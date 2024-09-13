@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  username        String    @unique
+  email           String    @unique
+  password        String
+  refreshToken    String?
+
+  blogs Blog[]
+  documents Document[]
+  
+  @@map("admins")
+}
+
+model Blog {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  title           String
+  slug            String    
+  content         String
+  
+  authorId        Int
+  author          Admin     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id              Int       @id @default(autoincrement())
+  uploadedAt      DateTime  @default(now()) @updatedAt
+
+  name            String
+  slug            String
+  category        String
+  url             String
+  size            String
+
+  uploaderId      Int
+  uploader        Admin     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+}
