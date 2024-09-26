@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Blog } from '@prisma/client';
 
 import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
@@ -11,7 +12,10 @@ import { PrismaService } from '@shared/prisma/prisma.service';
 
 @Injectable()
 export class BlogsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private config: ConfigService,
+  ) {}
 
   async getAllBlog(query: GetBlogDto): Promise<Blog[]> {
     const {
@@ -92,12 +96,14 @@ export class BlogsService {
 
   async createBlog(authorId: number, dto: CreateBlogDto): Promise<Blog> {
     const slug = generateSlug(dto.title);
+    const imageHeader = this.extractImageHeaderFromContent(dto.content);
 
     const blog = await this.prisma.blog.create({
       data: {
         title: dto.title,
         slug,
         content: dto.content,
+        imageHeader,
         authorId: authorId,
       },
     });
@@ -112,6 +118,10 @@ export class BlogsService {
 
     if (dto.title) {
       updatedData.slug = generateSlug(updatedData.title);
+    }
+
+    if (dto.content) {
+      updatedData.imageHeader = this.extractImageHeaderFromContent(dto.content);
     }
 
     const blog = await this.prisma.blog.update({
@@ -134,5 +144,12 @@ export class BlogsService {
     });
 
     return Blog;
+  }
+
+  private extractImageHeaderFromContent(content: string | null): string | null {
+    const regex = /<img [^>]*src="([^"]+)"/;
+    const firstImage = content.match(regex);
+
+    return firstImage[1] ?? this.config.get<string>('DEFAULT_IMAGE');
   }
 }

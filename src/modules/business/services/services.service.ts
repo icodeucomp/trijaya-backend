@@ -29,7 +29,7 @@ export class ServicesService {
         ...(title && { title: { contains: title, mode: 'insensitive' } }),
         ...(dateStart &&
           dateEnd && {
-            updatededAt: {
+            updatedAt: {
               gte: dateStarted,
               lt: dateEnded,
             },

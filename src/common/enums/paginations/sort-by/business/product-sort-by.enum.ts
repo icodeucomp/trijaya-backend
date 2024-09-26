@@ -1,6 +1,6 @@
 export enum ProductSortBy {
   Id = 'id',
   Title = 'title',
-  UpdatededAt = 'updatededAt',
+  UpdatedAt = 'updatedAt',
   BusinessId = 'businessId',
 }

@@ -30,9 +30,10 @@ model Blog {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title   String
-  slug    String
-  content String
+  title       String
+  slug        String
+  content     String
+  imageHeader String?
 
   authorId Int
   author   Admin @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -72,13 +73,14 @@ model Media {
 }
 
 model Business {
-  id          Int      @id @default(autoincrement())
-  updatededAt DateTime @default(now()) @updatedAt
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  title          String  @unique
-  slug           String
-  description    String
-  imageHeaderUrl String?
+  title             String   @unique
+  slug              String
+  description       String
+  imageHeaderUrl    String?
+  productHeaderUrls String?
 
   Product Product[]
   Project Project[]
@@ -88,8 +90,8 @@ model Business {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  updatededAt DateTime @default(now()) @updatedAt
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
 
   title       String   @unique
   slug        String
@@ -103,8 +105,8 @@ model Product {
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
-  updatededAt DateTime @default(now()) @updatedAt
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
 
   title       String   @unique
   slug        String
@@ -118,8 +120,8 @@ model Project {
 }
 
 model Service {
-  id          Int      @id @default(autoincrement())
-  updatededAt DateTime @default(now()) @updatedAt
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
 
   title       String   @unique
   slug        String

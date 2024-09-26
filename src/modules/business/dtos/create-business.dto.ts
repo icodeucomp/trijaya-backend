@@ -12,4 +12,8 @@ export class CreateBusinessDto {
   @IsString()
   @IsOptional()
   imageHeaderUrl: string;
+
+  @IsString()
+  @IsOptional()
+  productHeaderUrls: string;
 }

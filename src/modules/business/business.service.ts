@@ -29,16 +29,40 @@ export class BusinessService {
         ...(title && { title: { contains: title, mode: 'insensitive' } }),
         ...(dateStart &&
           dateEnd && {
-            updatededAt: {
+            updatedAt: {
               gte: dateStarted,
               lt: dateEnded,
             },
           }),
       },
       include: {
-        Project: true,
-        Product: true,
-        Service: true,
+        Project: {
+          include: {
+            business: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+        Product: {
+          include: {
+            business: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+        Service: {
+          include: {
+            business: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { [sort]: order },
       skip,
@@ -54,9 +78,33 @@ export class BusinessService {
         slug: businessSlug,
       },
       include: {
-        Project: true,
-        Product: true,
-        Service: true,
+        Project: {
+          include: {
+            business: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+        Product: {
+          include: {
+            business: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+        Service: {
+          include: {
+            business: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -76,6 +124,7 @@ export class BusinessService {
         slug,
         description: dto.description,
         imageHeaderUrl: dto.imageHeaderUrl,
+        productHeaderUrls: dto.productHeaderUrls,
       },
     });
 

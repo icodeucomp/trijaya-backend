@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Admin } from '@prisma/client';
@@ -58,8 +63,38 @@ export class AuthenticationService {
     return admin;
   }
 
+  async refreshTokens(
+    adminId: number,
+    refreshToken: string,
+  ): Promise<JwtTokens> {
+    const admin = await this.prisma.admin.findUnique({
+      where: {
+        id: adminId,
+      },
+    });
+
+    if (!admin)
+      throw new NotFoundException(
+        `Invalid credential, no admin found with id : ${adminId}`,
+      );
+
+    const refreshTokenMatches = await argon.verify(
+      admin.refreshToken,
+      refreshToken,
+    );
+
+    if (!refreshTokenMatches)
+      throw new ForbiddenException('Refresh token not matched');
+
+    const tokens = await this.signToken(admin.id, admin.username);
+
+    await this.updateRefreshToken(admin.id, tokens.refreshToken);
+
+    return tokens;
+  }
+
   private async signToken(
-    userId: number,
+    adminId: number,
     username: string,
   ): Promise<JwtTokens> {
     const atSecret = this.config.get<string>('JWT_AT_SECRET');
@@ -68,7 +103,7 @@ export class AuthenticationService {
     const rtExpire = this.config.get<string>('JWT_RT_EXPIRE');
 
     const payload: JwtPayload = {
-      sub: userId,
+      sub: adminId,
       username,
     };
 
@@ -90,13 +125,13 @@ export class AuthenticationService {
   }
 
   private async updateRefreshToken(
-    userId: number,
+    adminId: number,
     refreshToken: string,
   ): Promise<void> {
     const hashedRefreshToken = await argon.hash(refreshToken);
     await this.prisma.admin.update({
       where: {
-        id: userId,
+        id: adminId,
       },
       data: {
         refreshToken: hashedRefreshToken,

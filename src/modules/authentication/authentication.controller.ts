@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 
 import { GetUser } from '@common/decorators';
-import { JwtGuard } from '@common/guards';
+import { JwtGuard, JwtRefreshGuard } from '@common/guards';
 import { JwtTokens, ResponsePayload } from '@common/interfaces';
 import { successResponsePayload } from '@common/utils';
 import { LoginDto } from '@modules/authentication/dtos';
@@ -30,10 +30,24 @@ export class AuthenticationController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGuard)
   @Post('logout')
-  // update to get by param
   async logout(@GetUser('id') adminId: number): Promise<any> {
     const admin = await this.authenticationService.logout(adminId);
 
     return successResponsePayload('Admin logout', admin);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtRefreshGuard)
+  @Post('refresh-token')
+  async refreshTokens(
+    @GetUser('sub') adminId: number,
+    @GetUser('refreshToken') refreshToken: string,
+  ) {
+    const updatedRefreshToken = await this.authenticationService.refreshTokens(
+      adminId,
+      refreshToken,
+    );
+
+    return successResponsePayload('Admin logout', updatedRefreshToken);
   }
 }

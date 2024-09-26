@@ -1,6 +1,6 @@
 export enum ServiceSortBy {
   Id = 'id',
   Title = 'title',
-  UpdatededAt = 'updatededAt',
+  UpdatedAt = 'updatedAt',
   BusinessId = 'businessId',
 }
