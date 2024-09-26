@@ -1,4 +1,4 @@
-import { ResponsePayload } from '../interfaces';
+import { ResponsePayload } from '@common/interfaces';
 
 export function successResponsePayload<T>(
   message: string,

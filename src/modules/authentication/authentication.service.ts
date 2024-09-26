@@ -4,9 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Admin } from '@prisma/client';
 import * as argon from 'argon2';
 
-import { LoginDto } from './dto/login-dto';
-import { JwtPayload, JwtTokens } from '../../common/interfaces';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { JwtPayload, JwtTokens } from '@common/interfaces';
+import { LoginDto } from '@modules/authentication/dtos';
 
 @Injectable()
 export class AuthenticationService {

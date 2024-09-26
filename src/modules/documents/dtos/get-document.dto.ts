@@ -1,35 +1,32 @@
+// get-blogs.dto.ts
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
-import { BlogSortBy, OrderBy } from './../../../common/enums';
+import { DocumentSortBy, OrderBy } from '@common/enums';
 
-export class GetBlogDto {
+export class GetDocumentDto {
   @IsOptional()
   @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  dateCreateStart?: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
-  dateCreateEnd?: string;
+  category?: string;
 
   @IsOptional()
   @IsString()
-  dateUpdateStart?: string;
+  dateStart?: string;
 
   @IsOptional()
   @IsString()
-  dateUpdateEnd?: string;
+  dateEnd?: string;
 
   @IsOptional()
   @IsString()
-  author?: string;
+  uploadedBy?: string;
 
   @IsOptional()
-  @IsEnum(BlogSortBy)
-  sort?: BlogSortBy = BlogSortBy.Id;
+  @IsEnum(DocumentSortBy)
+  sort?: DocumentSortBy = DocumentSortBy.Id;
 
   @IsOptional()
   @IsEnum(OrderBy)

@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { Admin } from '@prisma/client';
 
-import { CreateAdminDto, UpdateAdminDto } from './dto';
-import { AdminService } from './admin.service';
-import { ResponsePayload } from '../../common/interfaces';
-import { JwtGuard } from '../../common/guards';
-import { successResponsePayload } from '../../common/utils';
+import { ResponsePayload } from '@common/interfaces';
+import { JwtGuard } from '@common/guards';
+import { successResponsePayload } from '@common/utils';
+import { CreateAdminDto, UpdateAdminDto } from '@modules/admin/dtos';
+import { AdminService } from '@modules/admin/admin.service';
 
 @UseGuards(JwtGuard)
 @Controller('admin')

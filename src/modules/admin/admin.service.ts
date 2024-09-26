@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Admin } from '@prisma/client';
 import * as argon from 'argon2';
 
-import { CreateAdminDto, UpdateAdminDto } from './dto';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { CreateAdminDto, UpdateAdminDto } from '@modules/admin/dtos';
 
 @Injectable()
 export class AdminService {

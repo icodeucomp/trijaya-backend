@@ -3,49 +3,131 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Admin {
-  id              Int       @id @default(autoincrement())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  username        String    @unique
-  email           String    @unique
-  password        String
-  refreshToken    String?
+  username     String  @unique
+  email        String  @unique
+  password     String
+  refreshToken String?
 
-  blogs Blog[]
+  blogs     Blog[]
   documents Document[]
-  
+  medias    Media[]
+
   @@map("admins")
 }
 
 model Blog {
-  id              Int       @id @default(autoincrement())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  title           String
-  slug            String    
-  content         String
-  
-  authorId        Int
-  author          Admin     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title   String
+  slug    String
+  content String
+
+  authorId Int
+  author   Admin @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("blogs")
 }
 
 model Document {
-  id              Int       @id @default(autoincrement())
-  uploadedAt      DateTime  @default(now()) @updatedAt
+  id         Int      @id @default(autoincrement())
+  uploadedAt DateTime @default(now()) @updatedAt
 
-  name            String
-  slug            String
-  category        String
-  url             String
-  size            String
+  name     String // unique handled in logic
+  slug     String
+  category String
+  url      String
+  size     String
 
-  uploaderId      Int
-  uploader        Admin     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  uploaderId Int
+  uploader   Admin @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Media {
+  id         Int      @id @default(autoincrement())
+  uploadedAt DateTime @default(now()) @updatedAt
+
+  name String
+  slug String
+  url  String
+  size String
+
+  uploaderId Int
+  uploader   Admin @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("medias")
+}
+
+model Business {
+  id          Int      @id @default(autoincrement())
+  updatededAt DateTime @default(now()) @updatedAt
+
+  title          String  @unique
+  slug           String
+  description    String
+  imageHeaderUrl String?
+
+  Product Product[]
+  Project Project[]
+  Service Service[]
+
+  @@map("business")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  updatededAt DateTime @default(now()) @updatedAt
+
+  title       String   @unique
+  slug        String
+  description String
+  mediaUrls   String[]
+
+  businessId Int
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("products")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  updatededAt DateTime @default(now()) @updatedAt
+
+  title       String   @unique
+  slug        String
+  description String
+  mediaUrls   String[]
+
+  businessId Int
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  updatededAt DateTime @default(now()) @updatedAt
+
+  title       String   @unique
+  slug        String
+  description String
+  mediaUrls   String[]
+
+  businessId Int
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("services")
 }

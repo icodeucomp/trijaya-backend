@@ -4,18 +4,21 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 
-import { CreateDocumentDto, GetDocumentDto, UpdateDocumentDto } from './dto';
-import { DocumentsService } from './documents.service';
-import { GetUser, Public } from '../../common/decorators';
-import { JwtGuard } from '../../common/guards';
-import { successResponsePayload } from '../../common/utils';
+import { GetUser, Public } from '@common/decorators';
+import { JwtGuard } from '@common/guards';
+import { successResponsePayload } from '@common/utils';
+import {
+  CreateDocumentDto,
+  GetDocumentDto,
+  UpdateDocumentDto,
+} from '@modules/documents/dtos';
+import { DocumentsService } from '@modules/documents/documents.service';
 
 @UseGuards(JwtGuard)
 @Controller('documents')
@@ -31,28 +34,14 @@ export class DocumentsController {
   }
 
   @Public()
-  @Get('category/:category')
-  async getAllDocumentInCategory(
-    @Param('category') category: string,
-    @Query() query: GetDocumentDto,
-  ) {
-    const documents = await this.documentService.getAllDocumentInCategory(
-      category,
-      query,
-    );
+  @Get(':documentSlug')
+  async getDocumentBySlug(@Param('documentSlug') documentSlug: string) {
+    const document = await this.documentService.getDocumentBySlug(documentSlug);
 
     return successResponsePayload(
-      `Get all document in category ${category}`,
-      documents,
+      `Get document by slug ${documentSlug}`,
+      document,
     );
-  }
-
-  @Public()
-  @Get(':id')
-  async getDocumentById(@Param('id', ParseIntPipe) documentId: number) {
-    const document = await this.documentService.getDocumentById(documentId);
-
-    return successResponsePayload(`Get document by id ${documentId}`, document);
   }
 
   @Post()
@@ -60,35 +49,37 @@ export class DocumentsController {
     @GetUser('id') uploaderId: number,
     @Body() dto: CreateDocumentDto,
   ) {
+    console.log({ uploaderId });
     const document = await this.documentService.createDocument(uploaderId, dto);
 
     return successResponsePayload('Create document', document);
   }
 
-  @Patch(':id')
-  async updateDocumentById(
-    @Param('id', ParseIntPipe) documentId: number,
+  @Patch(':documentSlug')
+  async updateDocumentBySlug(
     @GetUser('id') uploaderId: number,
+    @Param('documentSlug') documentSlug: string,
     @Body() dto: UpdateDocumentDto,
   ) {
-    const document = await this.documentService.updateDocumentById(
-      documentId,
+    const document = await this.documentService.updateDocumentBySlug(
+      documentSlug,
       uploaderId,
       dto,
     );
 
     return successResponsePayload(
-      `Update document by id ${documentId}`,
+      `Update document by slug ${documentSlug}`,
       document,
     );
   }
 
-  @Delete(':id')
-  async deleteDocumentById(@Param('id', ParseIntPipe) documentId: number) {
-    const document = await this.documentService.deleteDocumentById(documentId);
+  @Delete(':documentSlug')
+  async deleteDocumentBySlug(@Param('documentSlug') documentSlug: string) {
+    const document =
+      await this.documentService.deleteDocumentBySlug(documentSlug);
 
     return successResponsePayload(
-      `Delete document by id ${documentId}`,
+      `Delete document by slug ${documentSlug}`,
       document,
     );
   }

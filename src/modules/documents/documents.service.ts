@@ -1,61 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Document } from '@prisma/client';
 
-import { CreateDocumentDto, GetDocumentDto, UpdateDocumentDto } from './dto';
+import { PrismaService } from '@shared/prisma/prisma.service';
 import {
   generateDateRange,
   generatePagination,
   generateSlug,
-} from '../../common/utils';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+} from '@common/utils';
+import {
+  CreateDocumentDto,
+  GetDocumentDto,
+  UpdateDocumentDto,
+} from '@modules/documents/dtos';
 
 @Injectable()
 export class DocumentsService {
   constructor(private prisma: PrismaService) {}
 
   async getAllDocument(query: GetDocumentDto): Promise<Document[]> {
-    const { name, uploadedBy, dateStart, dateEnd, sort, order, page, limit } =
-      query;
+    const {
+      name,
+      category,
+      uploadedBy,
+      dateStart,
+      dateEnd,
+      sort,
+      order,
+      page,
+      limit,
+    } = query;
     const { skip, take } = generatePagination(page, limit);
-
-    const { start: dateStarted } = generateDateRange(dateStart);
-    const { end: dateEnded } = generateDateRange(dateEnd);
-
-    const documents = this.prisma.document.findMany({
-      where: {
-        ...(name && { name: { contains: name, mode: 'insensitive' } }),
-        ...(uploadedBy && {
-          uploaderId: Number(uploadedBy),
-        }),
-        ...(dateStart &&
-          dateEnd && {
-            uploadedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
-            },
-          }),
-      },
-      include: {
-        uploader: {
-          select: {
-            username: true,
-          },
-        },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
-
-    return documents;
-  }
-
-  async getAllDocumentInCategory(
-    category: string,
-    query: GetDocumentDto,
-  ): Promise<Document[]> {
-    const { name, uploadedBy, dateStart, dateEnd, sort, order, page, limit } =
-      query;
 
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
@@ -83,17 +57,17 @@ export class DocumentsService {
         },
       },
       orderBy: { [sort]: order },
-      skip: (Number(page) - 1) * Number(limit),
-      take: Number(limit),
+      skip,
+      take,
     });
 
     return documents;
   }
 
-  async getDocumentById(documentId: number): Promise<Document> {
-    const document = await this.prisma.document.findUnique({
+  async getDocumentBySlug(documentSlug: string): Promise<Document> {
+    const document = await this.prisma.document.findFirst({
       where: {
-        id: documentId,
+        slug: documentSlug,
       },
       include: {
         uploader: {
@@ -103,6 +77,10 @@ export class DocumentsService {
         },
       },
     });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
 
     return document;
   }
@@ -128,11 +106,13 @@ export class DocumentsService {
     return document;
   }
 
-  async updateDocumentById(
-    documentId: number,
+  async updateDocumentBySlug(
+    documentSlug: string,
     uploaderId: number,
     dto: UpdateDocumentDto,
   ) {
+    const existingDocument = await this.getDocumentBySlug(documentSlug);
+
     const updatedData: UpdateDocumentDto = { ...dto };
     updatedData.uploaderId = uploaderId;
 
@@ -143,7 +123,7 @@ export class DocumentsService {
 
     const document = await this.prisma.document.update({
       where: {
-        id: documentId,
+        id: existingDocument.id,
       },
       data: updatedData,
     });
@@ -151,10 +131,12 @@ export class DocumentsService {
     return document;
   }
 
-  async deleteDocumentById(documentId: number): Promise<Document> {
+  async deleteDocumentBySlug(documentSlug: string): Promise<Document> {
+    const existingDocument = await this.getDocumentBySlug(documentSlug);
+
     const document = await this.prisma.document.delete({
       where: {
-        id: documentId,
+        id: existingDocument.id,
       },
     });
 

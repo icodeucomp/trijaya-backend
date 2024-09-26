@@ -4,18 +4,17 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 
-import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from './dto';
-import { BlogsService } from './blogs.service';
-import { GetUser, Public } from '../../common/decorators';
-import { JwtGuard } from '../../common/guards';
-import { successResponsePayload } from '../../common/utils';
+import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
+import { BlogsService } from '@modules/blogs/blogs.service';
+import { GetUser, Public } from '@common/decorators';
+import { JwtGuard } from '@common/guards';
+import { successResponsePayload } from '@common/utils';
 
 @UseGuards(JwtGuard)
 @Controller('blogs')
@@ -31,11 +30,11 @@ export class BlogsController {
   }
 
   @Public()
-  @Get(':id')
-  async getBlogById(@Param('id', ParseIntPipe) blogId: number) {
-    const blog = await this.blogservice.getBlogById(blogId);
+  @Get(':blogSlug')
+  async getBlogBySlug(@Param('blogSlug') blogSlug: string) {
+    const blog = await this.blogservice.getBlogBySlug(blogSlug);
 
-    return successResponsePayload(`Get blog by id ${blogId}`, blog);
+    return successResponsePayload(`Get blog by slug ${blogSlug}`, blog);
   }
 
   @Post()
@@ -48,20 +47,20 @@ export class BlogsController {
     return successResponsePayload('Create blog', blog);
   }
 
-  @Patch(':id')
-  async updateBlogById(
-    @Param('id', ParseIntPipe) blogId: number,
+  @Patch(':blogSlug')
+  async updateBlogBySlug(
+    @Param('blogSlug') blogSlug: string,
     @Body() dto: UpdateBlogDto,
   ) {
-    const blog = await this.blogservice.updateBlogById(blogId, dto);
+    const blog = await this.blogservice.updateBlogBySlug(blogSlug, dto);
 
-    return successResponsePayload(`Update blog by id ${blogId}`, blog);
+    return successResponsePayload(`Update blog by slug ${blogSlug}`, blog);
   }
 
-  @Delete(':id')
-  async deleteBlogById(@Param('id', ParseIntPipe) blogId: number) {
-    const blog = await this.blogservice.deleteBlogById(blogId);
+  @Delete(':blogSlug')
+  async deleteBlogBySlug(@Param('blogSlug') blogSlug: string) {
+    const blog = await this.blogservice.deleteBlogBySlug(blogSlug);
 
-    return successResponsePayload(`Delete blog by id ${blogId}`, blog);
+    return successResponsePayload(`Delete blog by slug ${blogSlug}`, blog);
   }
 }

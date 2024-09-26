@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Blog } from '@prisma/client';
 
-import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from './dto';
+import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
 import {
   generateDateRange,
   generatePagination,
   generateSlug,
-} from '../../common/utils';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+} from '@common/utils';
+import { PrismaService } from '@shared/prisma/prisma.service';
 
 @Injectable()
 export class BlogsService {
@@ -69,10 +69,10 @@ export class BlogsService {
     return blogs;
   }
 
-  async getBlogById(blogId: number): Promise<Blog> {
-    const blog = await this.prisma.blog.findUnique({
+  async getBlogBySlug(blogSlug: string): Promise<Blog> {
+    const blog = await this.prisma.blog.findFirst({
       where: {
-        id: blogId,
+        slug: blogSlug,
       },
       include: {
         author: {
@@ -82,6 +82,10 @@ export class BlogsService {
         },
       },
     });
+
+    if (!blog) {
+      throw new NotFoundException('Blog not found');
+    }
 
     return blog;
   }
@@ -101,7 +105,9 @@ export class BlogsService {
     return blog;
   }
 
-  async updateBlogById(blogId: number, dto: UpdateBlogDto) {
+  async updateBlogBySlug(blogSlug: string, dto: UpdateBlogDto) {
+    const existingBlog = await this.getBlogBySlug(blogSlug);
+
     const updatedData: UpdateBlogDto = { ...dto };
 
     if (dto.title) {
@@ -110,7 +116,7 @@ export class BlogsService {
 
     const blog = await this.prisma.blog.update({
       where: {
-        id: blogId,
+        id: existingBlog.id,
       },
       data: updatedData,
     });
@@ -118,10 +124,12 @@ export class BlogsService {
     return blog;
   }
 
-  async deleteBlogById(BlogId: number): Promise<Blog> {
+  async deleteBlogBySlug(blogSlug: string): Promise<Blog> {
+    const existingBlog = await this.getBlogBySlug(blogSlug);
+
     const Blog = await this.prisma.blog.delete({
       where: {
-        id: BlogId,
+        id: existingBlog.id,
       },
     });
 

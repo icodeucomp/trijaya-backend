@@ -1,9 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { IsOptional, IsString } from 'class-validator';
 
-import { CreateBlogDto } from './create-blog.dto';
+import { CreateProjectDto } from '@modules/business/projects/dtos';
 
-export class UpdateBlogDto extends PartialType(CreateBlogDto) {
+export class UpdateProjectDto extends PartialType(CreateProjectDto) {
   @IsString()
   @IsOptional()
   slug?: string;

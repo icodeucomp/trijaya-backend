@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 
-import { S3Service } from './s3.service';
+import { S3Service } from '@shared/s3/s3.service';
 
 @Global()
 @Module({

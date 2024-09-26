@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
-import { AuthenticationController } from './authentication.controller';
-import { AuthenticationService } from './authentication.service';
-import { JwtStrategy, RtStrategy } from './strategies';
+import { JwtStrategy, RtStrategy } from '@modules/authentication/strategies';
+import { AuthenticationController } from '@modules/authentication/authentication.controller';
+import { AuthenticationService } from '@modules/authentication/authentication.service';
 
 @Module({
   imports: [

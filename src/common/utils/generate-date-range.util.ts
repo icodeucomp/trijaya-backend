@@ -1,4 +1,4 @@
-import { DateRange } from '../interfaces';
+import { DateRange } from '@common/interfaces';
 
 export const generateDateRange = (dateString: string): DateRange => {
   const date = new Date(dateString);
