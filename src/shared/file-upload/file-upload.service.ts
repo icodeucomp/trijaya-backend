@@ -4,24 +4,21 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 
 import { BusinessSlug, MediaType } from '@common/enums';
-import { generateFileSize, generateSlug } from '@common/utils';
-import { PrismaService } from '@shared/prisma/prisma.service';
+import { generateFileSize } from '@common/utils';
 import { S3Service } from '@shared/s3/s3.service';
 
 @Injectable()
 export class FileUploadService {
   constructor(
     private config: ConfigService,
-    private prisma: PrismaService,
     private s3: S3Service,
   ) {}
 
   async uploadFile(
-    uploaderId: number,
     file: Express.Multer.File,
     type: MediaType,
     category: BusinessSlug | string,
-  ): Promise<{ url: string; size: string }> {
+  ): Promise<{ name: string; url: string; size: string }> {
     if (!file) {
       throw new BadRequestException('please input file');
     }
@@ -34,10 +31,10 @@ export class FileUploadService {
 
     const folderName =
       type === MediaType.Business
-        ? `media/${type}/${category}/header`
+        ? `${type}/${category}/header`
         : type === MediaType.Document
           ? `${type}/${category}`
-          : `media/${type}`;
+          : `${type}`;
     const fileStream = fs.createReadStream(file.path);
     const contentType = file.mimetype || 'application/octet-stream';
     const fileSize = generateFileSize(file.size);
@@ -59,30 +56,23 @@ export class FileUploadService {
       'S3_REGION',
     )}.amazonaws.com/${data.Key}`;
 
-    if (type !== MediaType.Document) {
-      await this.prisma.media.create({
-        data: {
-          name: file.filename,
-          slug: generateSlug(file.filename),
-          url: objectUrl,
-          size: fileSize,
-          uploaderId,
-        },
-      });
-    }
-
-    return { url: objectUrl, size: fileSize };
+    return { name: file.filename, url: objectUrl, size: fileSize };
   }
 
   async uploadFiles(
-    uploaderId: number,
     files: Express.Multer.File[],
-    folderName: string,
-  ): Promise<{ uploadedFiles: { url: string; size: string }[] }> {
+    businessSlug: string,
+    type: string,
+  ): Promise<{ uploadedFiles: { name: string; url: string; size: string }[] }> {
     const uploadedFiles = [];
+    let folderName: string = 'media';
 
     if (!files) {
       throw new BadRequestException('please input file');
+    }
+
+    if (businessSlug && type) {
+      folderName = `business/${businessSlug}/${type}`;
     }
 
     for (const file of files) {
@@ -114,18 +104,9 @@ export class FileUploadService {
         const data = await upload.done();
         const objectUrl = `https://${this.config.get('S3_BUCKET')}.s3.${this.config.get('S3_REGION')}.amazonaws.com/${data.Key}`;
         uploadedFiles.push({
+          name: file.filename,
           url: objectUrl,
           size: fileSize,
-        });
-
-        await this.prisma.media.create({
-          data: {
-            name: file.filename,
-            slug: generateSlug(file.filename),
-            url: objectUrl,
-            size: fileSize,
-            uploaderId,
-          },
         });
       } catch (error) {
         console.error({ error });

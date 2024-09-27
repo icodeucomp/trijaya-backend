@@ -15,5 +15,5 @@ export class CreateBusinessDto {
 
   @IsString()
   @IsOptional()
-  productHeaderUrls: string;
+  productHeaderUrl: string;
 }

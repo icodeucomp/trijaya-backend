@@ -14,6 +14,7 @@ import { BusinessModule } from '@modules/business/business.module';
 import { ProjectsModule } from '@modules/business/projects/projects.module';
 import { ProductsModule } from '@modules/business/products/products.module';
 import { ServicesModule } from '@modules/business/services/services.module';
+import { MediaModule } from '@modules/media/media.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ServicesModule } from '@modules/business/services/services.module';
     ProductsModule,
     ProjectsModule,
     ServicesModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

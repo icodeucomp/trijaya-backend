@@ -76,11 +76,11 @@ model Business {
   id        Int      @id @default(autoincrement())
   updatedAt DateTime @default(now()) @updatedAt
 
-  title             String   @unique
-  slug              String
-  description       String
-  imageHeaderUrl    String?
-  productHeaderUrls String?
+  title            String  @unique
+  slug             String
+  description      String
+  imageHeaderUrl   String?
+  productHeaderUrl String?
 
   Product Product[]
   Project Project[]

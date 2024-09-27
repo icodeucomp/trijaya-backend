@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
-import { GetUser } from '@common/decorators';
 import { BusinessSlug, BusinessType, MediaType } from '@common/enums';
 import { JwtGuard } from '@common/guards';
 import { maxSize, maxUpload, storage } from '@common/utils';
@@ -27,13 +26,13 @@ export class FileUploadController {
     FileInterceptor('upload', { storage, limits: { fileSize: maxSize } }),
   )
   async uploadFile(
-    @GetUser('id') uploaderId: number,
-    @Query('type', new ParseEnumPipe(MediaType)) type: MediaType,
+    @Query('type', new ParseEnumPipe(MediaType, { optional: true }))
+    type: MediaType,
     @Query('category')
-    category: string, // set category for business or document
+    category: string,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<{ url: string; size: string }> {
-    const url = this.fileUpload.uploadFile(uploaderId, file, type, category);
+    const url = this.fileUpload.uploadFile(file, type, category);
 
     return url;
   }
@@ -47,19 +46,13 @@ export class FileUploadController {
     }),
   )
   async uploadFiles(
-    @GetUser('id') uploaderId: number,
-    @Query('business', new ParseEnumPipe(BusinessSlug))
+    @Query('business', new ParseEnumPipe(BusinessSlug, { optional: true }))
     businessSlug: BusinessSlug,
-    @Query('type', new ParseEnumPipe(BusinessType)) type: BusinessType,
+    @Query('type', new ParseEnumPipe(BusinessType, { optional: true }))
+    type: BusinessType,
     @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<{ uploadedFiles: { url: string; size: string }[] }> {
-    const folderName = `media/business/${businessSlug}/${type}`;
-
-    const urls = await this.fileUpload.uploadFiles(
-      uploaderId,
-      files,
-      folderName,
-    );
+  ): Promise<{ uploadedFiles: { name: string; url: string; size: string }[] }> {
+    const urls = await this.fileUpload.uploadFiles(files, businessSlug, type);
 
     return urls;
   }

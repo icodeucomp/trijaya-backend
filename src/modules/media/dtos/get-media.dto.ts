@@ -1,15 +1,11 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
-import { DocumentSortBy, OrderBy } from '@common/enums';
+import { MediaSortBy, OrderBy } from '@common/enums';
 
-export class GetDocumentDto {
+export class GetMediaDto {
   @IsOptional()
   @IsString()
   name?: string;
-
-  @IsOptional()
-  @IsString()
-  category?: string;
 
   @IsOptional()
   @IsString()
@@ -24,8 +20,8 @@ export class GetDocumentDto {
   uploadedBy?: string;
 
   @IsOptional()
-  @IsEnum(DocumentSortBy)
-  sort?: DocumentSortBy = DocumentSortBy.Id;
+  @IsEnum(MediaSortBy)
+  sort?: MediaSortBy = MediaSortBy.Id;
 
   @IsOptional()
   @IsEnum(OrderBy)

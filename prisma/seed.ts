@@ -6,6 +6,8 @@ import { BusinessSlug } from '../src/common/enums';
 const prisma = new PrismaClient();
 
 async function main() {
+  const totalBusinessItem: number = 5;
+
   const documentCategories = [
     'Financial Reports',
     'Project Proposals',
@@ -14,29 +16,74 @@ async function main() {
     'Marketing Strategies',
   ];
 
-  const businessTitle = [
-    'Civil',
-    'Construction',
-    'Electrical',
-    'Fabrication',
-    'General Supplier',
-    'Machining',
-    'Mechanical',
+  const businessData = [
+    {
+      title: 'Civil',
+      slug: BusinessSlug.Civil,
+      description: "This is description for business 'civil'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
+    {
+      title: 'Construction',
+      slug: BusinessSlug.Construction,
+      description: "This is description for business 'construction'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
+    {
+      title: 'Electrical',
+      slug: BusinessSlug.Electrical,
+      description: "This is description for business 'electrical'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
+    {
+      title: 'Fabrication',
+      slug: BusinessSlug.Fabrication,
+      description: "This is description for business 'fabrication'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
+    {
+      title: 'General Supplier',
+      slug: BusinessSlug.General_supplier,
+      description: "This is description for business 'general supplier'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
+    {
+      title: 'Machining',
+      slug: BusinessSlug.Machining,
+      description: "This is description for business 'machining'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
+    {
+      title: 'Mechanical',
+      slug: BusinessSlug.Mechanical,
+      description: "This is description for business 'mechanical'",
+      imageHeaderUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      productHeadersUrl:
+        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+    },
   ];
 
-  const businessSlug = [
-    BusinessSlug.Civil,
-    BusinessSlug.Construction,
-    BusinessSlug.Electrical,
-    BusinessSlug.Fabrication,
-    BusinessSlug.General_supplier,
-    BusinessSlug.Machining,
-    BusinessSlug.Mechanical,
-  ];
-
-  for (let i = 1; i <= businessSlug.length; i++) {
+  for (let i = 1; i <= businessData.length; i++) {
     const index = (i - 1) % documentCategories.length;
-    const randomUrlTitle = Math.random().toString(36).substring(2, 10);
 
     await prisma.admin.upsert({
       where: { username: `admin${i}` },
@@ -68,7 +115,7 @@ async function main() {
         name: `Document ${i}`,
         slug: generateSlug(`Document ${i}`),
         category: documentCategories[index],
-        url: `https://example.com/document/${randomUrlTitle}`,
+        url: `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/documents/gitkraken-git-basics-cheat-sheet-1726203463649.pdf`,
         size: `${String(Math.floor(Math.random() * (999 - 500 + 1)) + 500)} KB`,
         uploaderId: i,
       },
@@ -79,63 +126,66 @@ async function main() {
       where: { id: i },
       update: {},
       create: {
-        title: businessTitle[i - 1],
-        slug: businessSlug[i - 1],
-        description: `Description for ${businessTitle[i - 1]}`,
-        imageHeaderUrl: `https://example.com/document/${randomUrlTitle}`,
+        title: businessData[i - 1].title,
+        slug: businessData[i - 1].slug,
+        description: businessData[i - 1].description,
+        imageHeaderUrl: businessData[i - 1].imageHeaderUrl,
+        productHeaderUrl: businessData[i - 1].imageHeaderUrl,
       },
     });
 
-    // Product
-    await prisma.product.upsert({
-      where: { id: i },
-      update: {},
-      create: {
-        title: `${businessTitle[i - 1]} Product`,
-        slug: `${businessSlug[i - 1]}-product`,
-        description: `Description for ${businessTitle[i - 1]}`,
-        mediaUrls: [
-          `https://example.com/document/${randomUrlTitle}a1`,
-          `https://example.com/document/${randomUrlTitle}b2`,
-          `https://example.com/document/${randomUrlTitle}c3`,
-        ],
-        businessId: i,
-      },
-    });
+    for (let j = 1; j <= totalBusinessItem; j++) {
+      // Product
+      await prisma.product.upsert({
+        where: { id: (i - 1) * totalBusinessItem + j },
+        update: {},
+        create: {
+          title: `${businessData[i - 1].title} Product ${j}`,
+          slug: `${businessData[i - 1].slug}-product-${j}`,
+          description: `${businessData[i - 1].title} product ${j}`,
+          mediaUrls: [
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+          ],
+          businessId: i,
+        },
+      });
 
-    // Project
-    await prisma.project.upsert({
-      where: { id: i },
-      update: {},
-      create: {
-        title: `${businessTitle[i - 1]} Project`,
-        slug: `${businessSlug[i - 1]}-project`,
-        description: `Description for ${businessTitle[i - 1]}`,
-        mediaUrls: [
-          `https://example.com/document/${randomUrlTitle}a1`,
-          `https://example.com/document/${randomUrlTitle}b2`,
-          `https://example.com/document/${randomUrlTitle}c3`,
-        ],
-        businessId: i,
-      },
-    });
+      // Project
+      await prisma.project.upsert({
+        where: { id: (i - 1) * totalBusinessItem + j },
+        update: {},
+        create: {
+          title: `${businessData[i - 1].title} Project ${j}`,
+          slug: `${businessData[i - 1].slug}-project-${j}`,
+          description: `${businessData[i - 1].title} project ${j}`,
+          mediaUrls: [
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+          ],
+          businessId: i,
+        },
+      });
 
-    // service
-    await prisma.service.upsert({
-      where: { id: i },
-      update: {},
-      create: {
-        title: `${businessTitle[i - 1]} Service`,
-        slug: `${businessSlug[i - 1]}-service`,
-        description: `Description for ${businessTitle[i - 1]}`,
-        mediaUrls: [
-          `https://example.com/document/${randomUrlTitle}a1`,
-          `https://example.com/document/${randomUrlTitle}b2`,
-          `https://example.com/document/${randomUrlTitle}c3`,
-        ],
-        businessId: i,
-      },
-    });
+      // Service
+      await prisma.service.upsert({
+        where: { id: (i - 1) * totalBusinessItem + j },
+        update: {},
+        create: {
+          title: `${businessData[i - 1].title} Service ${j}`,
+          slug: `${businessData[i - 1].slug}-service-${j}`,
+          description: `${businessData[i - 1].title} service ${j}`,
+          mediaUrls: [
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+          ],
+          businessId: i,
+        },
+      });
+    }
   }
   console.log('Seeding completed');
 }

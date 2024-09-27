@@ -124,7 +124,7 @@ export class BusinessService {
         slug,
         description: dto.description,
         imageHeaderUrl: dto.imageHeaderUrl,
-        productHeaderUrls: dto.productHeaderUrls,
+        productHeaderUrl: dto.productHeaderUrl,
       },
     });
 
