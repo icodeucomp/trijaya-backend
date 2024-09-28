@@ -1,6 +1,6 @@
 export enum DocumentSortBy {
   Id = 'id',
   Name = 'name',
-  UploadedAt = 'updloadedAt',
+  UploadedAt = 'uploadedAt',
   UploadedBy = 'uploadedBy',
 }

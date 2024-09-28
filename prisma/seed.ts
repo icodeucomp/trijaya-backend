@@ -121,6 +121,18 @@ async function main() {
       },
     });
 
+    await prisma.media.upsert({
+      where: { id: i },
+      update: {},
+      create: {
+        name: `Media ${i}`,
+        slug: generateSlug(`media ${i}`),
+        url: `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+        size: `${String(Math.floor(Math.random() * (999 - 500 + 1)) + 500)} KB`,
+        uploaderId: i,
+      },
+    });
+
     // Business
     await prisma.business.upsert({
       where: { id: i },
