@@ -1,6 +1,5 @@
 import { Upload } from '@aws-sdk/lib-storage';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 
 import { BusinessSlug, MediaType } from '@common/enums';
@@ -9,10 +8,13 @@ import { S3Service } from '@shared/s3/s3.service';
 
 @Injectable()
 export class FileUploadService {
-  constructor(
-    private config: ConfigService,
-    private s3: S3Service,
-  ) {}
+  private readonly bucket: string;
+  private readonly region: string;
+
+  constructor(private s3: S3Service) {
+    this.bucket = this.s3.getBucket();
+    this.region = this.s3.getRegion();
+  }
 
   async uploadFile(
     file: Express.Multer.File,
@@ -43,7 +45,7 @@ export class FileUploadService {
       client: this.s3,
       params: {
         ACL: 'public-read',
-        Bucket: this.config.get<string>('S3_BUCKET'),
+        Bucket: this.bucket,
         Key: `${folderName}/${file.filename}`, // File path in S3
         Body: fileStream,
         ContentType: contentType,
@@ -52,9 +54,7 @@ export class FileUploadService {
 
     const data = await upload.done();
 
-    const objectUrl = `https://${this.config.get<string>('S3_BUCKET')}.s3.${this.config.get<string>(
-      'S3_REGION',
-    )}.amazonaws.com/${data.Key}`;
+    const objectUrl = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${data.Key}`;
 
     return { name: file.filename, url: objectUrl, size: fileSize };
   }
@@ -89,7 +89,7 @@ export class FileUploadService {
         client: this.s3,
         params: {
           ACL: 'public-read',
-          Bucket: this.config.get('S3_BUCKET'),
+          Bucket: this.bucket,
           Key: `${folderName}/${file.filename}`,
           Body: fileStream,
           ContentType: contentType,
@@ -102,7 +102,7 @@ export class FileUploadService {
 
       try {
         const data = await upload.done();
-        const objectUrl = `https://${this.config.get('S3_BUCKET')}.s3.${this.config.get('S3_REGION')}.amazonaws.com/${data.Key}`;
+        const objectUrl = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${data.Key}`;
         uploadedFiles.push({
           name: file.filename,
           url: objectUrl,

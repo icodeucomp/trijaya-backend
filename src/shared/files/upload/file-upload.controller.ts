@@ -13,7 +13,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { BusinessSlug, BusinessType, MediaType } from '@common/enums';
 import { JwtGuard } from '@common/guards';
 import { maxSize, maxUpload, storage } from '@common/utils';
-import { FileUploadService } from '@shared/file-upload/file-upload.service';
+import { FileUploadService } from '@shared/files/upload/file-upload.service';
 
 @UseGuards(JwtGuard)
 @Controller('upload')

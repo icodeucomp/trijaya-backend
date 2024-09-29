@@ -4,9 +4,9 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { Admin } from '@prisma/client';
@@ -14,7 +14,11 @@ import { Admin } from '@prisma/client';
 import { ResponsePayload } from '@common/interfaces';
 import { JwtGuard } from '@common/guards';
 import { successResponsePayload } from '@common/utils';
-import { CreateAdminDto, UpdateAdminDto } from '@modules/admin/dtos';
+import {
+  CreateAdminDto,
+  GetAdminDto,
+  UpdateAdminDto,
+} from '@modules/admin/dtos';
 import { AdminService } from '@modules/admin/admin.service';
 
 @UseGuards(JwtGuard)
@@ -23,8 +27,10 @@ export class AdminController {
   constructor(private adminService: AdminService) {}
 
   @Get()
-  async getAllAdmin(): Promise<ResponsePayload<Admin[]>> {
-    const admins = await this.adminService.getAllAdmin();
+  async getAllAdmin(
+    @Query() query: GetAdminDto,
+  ): Promise<ResponsePayload<Admin[]>> {
+    const admins = await this.adminService.getAllAdmin(query);
 
     return successResponsePayload('Get all admin', admins);
   }
@@ -41,13 +47,13 @@ export class AdminController {
     );
   }
 
-  @Get(':id')
-  async getAdminById(
-    @Param('id', ParseIntPipe) adminId: number,
+  @Get(':username')
+  async getAdminByUsername(
+    @Param('username') username: string,
   ): Promise<ResponsePayload<Admin>> {
-    const admin = await this.adminService.getAdminById(adminId);
+    const admin = await this.adminService.getAdminByUsername(username);
 
-    return successResponsePayload(`Get admin by id ${adminId}`, admin);
+    return successResponsePayload(`Get admin by username ${username}`, admin);
   }
 
   @Post()
@@ -59,22 +65,28 @@ export class AdminController {
     return successResponsePayload('Create admin', admin);
   }
 
-  @Patch(':id')
-  async updateAdminById(
-    @Param('id', ParseIntPipe) adminId: number,
+  @Patch(':username')
+  async updateAdminByUsername(
+    @Param('username') username: string,
     @Body() dto: UpdateAdminDto,
   ): Promise<ResponsePayload<Admin>> {
-    const admin = await this.adminService.updateAdminById(adminId, dto);
+    const admin = await this.adminService.updateAdminByUsername(username, dto);
 
-    return successResponsePayload(`Update admin by id ${adminId}`, admin);
+    return successResponsePayload(
+      `Update admin by username ${username}`,
+      admin,
+    );
   }
 
-  @Delete(':id')
-  async deleteAdminById(
-    @Param('id', ParseIntPipe) adminId: number,
+  @Delete(':username')
+  async deleteAdminByUsername(
+    @Param('username') username: string,
   ): Promise<ResponsePayload<Admin>> {
-    const admin = await this.adminService.deleteAdminById(adminId);
+    const admin = await this.adminService.deleteAdminByUsername(username);
 
-    return successResponsePayload(`Delete admin by id ${adminId}`, admin);
+    return successResponsePayload(
+      `Delete admin by username ${username}`,
+      admin,
+    );
   }
 }

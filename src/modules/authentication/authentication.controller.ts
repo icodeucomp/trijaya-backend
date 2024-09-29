@@ -3,6 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -30,7 +31,7 @@ export class AuthenticationController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGuard)
   @Post('logout')
-  async logout(@GetUser('id') adminId: number): Promise<any> {
+  async logout(@GetUser('id', ParseIntPipe) adminId: number): Promise<any> {
     const admin = await this.authenticationService.logout(adminId);
 
     return successResponsePayload('Admin logout', admin);
@@ -40,7 +41,7 @@ export class AuthenticationController {
   @UseGuards(JwtRefreshGuard)
   @Post('refresh-token')
   async refreshTokens(
-    @GetUser('sub') adminId: number,
+    @GetUser('sub', ParseIntPipe) adminId: number,
     @GetUser('refreshToken') refreshToken: string,
   ) {
     const updatedRefreshToken = await this.authenticationService.refreshTokens(

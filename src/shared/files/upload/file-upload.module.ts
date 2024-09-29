@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 
-import { FileUploadController } from '@shared/file-upload/file-upload.controller';
-import { FileUploadService } from '@shared/file-upload/file-upload.service';
+import { FileUploadController } from '@shared/files/upload/file-upload.controller';
+import { FileUploadService } from '@shared/files/upload/file-upload.service';
 
 @Global()
 @Module({

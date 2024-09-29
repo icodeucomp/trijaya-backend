@@ -4,6 +4,9 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class S3Service extends S3Client {
+  private readonly bucket: string;
+  private readonly region: string;
+
   constructor(config: ConfigService) {
     super({
       credentials: {
@@ -12,6 +15,9 @@ export class S3Service extends S3Client {
       },
       region: config.get('S3_REGION'),
     });
+
+    this.bucket = config.get<string>('S3_BUCKET');
+    this.region = config.get<string>('S3_REGION');
   }
 
   async onModuleInit() {
@@ -28,5 +34,13 @@ export class S3Service extends S3Client {
     } catch (error) {
       console.error('Failed to disconnect from S3:', error);
     }
+  }
+
+  getBucket(): string {
+    return this.bucket;
+  }
+
+  getRegion(): string {
+    return this.region;
   }
 }

@@ -1,26 +1,116 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Admin } from '@prisma/client';
 import * as argon from 'argon2';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
-import { CreateAdminDto, UpdateAdminDto } from '@modules/admin/dtos';
+import { generateDateRange, generatePagination } from '@common/utils';
+import {
+  CreateAdminDto,
+  GetAdminDto,
+  UpdateAdminDto,
+} from '@modules/admin/dtos';
 
 @Injectable()
 export class AdminService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllAdmin(): Promise<Admin[]> {
-    const admins = await this.prisma.admin.findMany();
+  async getAllAdmin(query: GetAdminDto): Promise<Admin[]> {
+    const {
+      username,
+      email,
+      dateCreateStart,
+      dateCreateEnd,
+      dateUpdateStart,
+      dateUpdateEnd,
+      sort,
+      order,
+      page,
+      limit,
+    } = query;
+    const { skip, take } = generatePagination(page, limit);
+
+    const { start: dateCreatedStart } = generateDateRange(dateCreateStart);
+    const { end: dateCreatedEnd } = generateDateRange(dateCreateEnd);
+    const { start: dateUpdatedStart } = generateDateRange(dateUpdateStart);
+    const { end: dateUpdatedEnd } = generateDateRange(dateUpdateEnd);
+
+    const admins = await this.prisma.admin.findMany({
+      where: {
+        ...(username && {
+          username: { contains: username, mode: 'insensitive' },
+        }),
+        ...(email && { email: { contains: email, mode: 'insensitive' } }),
+        ...(dateCreateStart &&
+          dateCreateEnd && {
+            uploadedAt: {
+              gte: dateCreatedStart,
+              lt: dateCreatedEnd,
+            },
+          }),
+        ...(dateUpdateStart &&
+          dateUpdateEnd && {
+            uploadedAt: {
+              gte: dateUpdatedStart,
+              lt: dateUpdatedEnd,
+            },
+          }),
+      },
+      include: {
+        blogs: {
+          select: {
+            title: true,
+          },
+        },
+        documents: {
+          select: {
+            name: true,
+          },
+        },
+        medias: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: { [sort]: order },
+      skip,
+      take,
+    });
 
     return admins;
   }
 
-  async getAdminById(adminId: number): Promise<Admin> {
+  async getAdminByUsername(username: string): Promise<Admin> {
     const admin = await this.prisma.admin.findUnique({
       where: {
-        id: adminId,
+        username,
+      },
+      include: {
+        blogs: {
+          select: {
+            title: true,
+          },
+        },
+        documents: {
+          select: {
+            name: true,
+          },
+        },
+        medias: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
+
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
 
     return admin;
   }
@@ -39,33 +129,50 @@ export class AdminService {
     return admin;
   }
 
-  async updateAdminById(adminId: number, dto: UpdateAdminDto): Promise<Admin> {
+  async updateAdminByUsername(
+    username: string,
+    dto: UpdateAdminDto,
+  ): Promise<Admin> {
     const updatedData: UpdateAdminDto = { ...dto };
 
     if (dto.password) {
       updatedData.password = await argon.hash(dto.password);
     }
 
-    const admin = await this.prisma.admin.update({
-      where: {
-        id: adminId,
-      },
-      data: {
-        ...updatedData,
-      },
-    });
+    try {
+      const admin = await this.prisma.admin.update({
+        where: {
+          username,
+        },
+        data: {
+          ...updatedData,
+        },
+      });
 
-    return admin;
+      return admin;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Admin not found`);
+      }
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  async deleteAdminById(adminId: number): Promise<Admin> {
-    const admin = await this.prisma.admin.delete({
-      where: {
-        id: adminId,
-      },
-    });
+  async deleteAdminByUsername(username: string): Promise<Admin> {
+    try {
+      const admin = await this.prisma.admin.delete({
+        where: {
+          username,
+        },
+      });
 
-    return admin;
+      return admin;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Admin not found`);
+      }
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async getAllAdminIdAndUsername(): Promise<object[]> {
