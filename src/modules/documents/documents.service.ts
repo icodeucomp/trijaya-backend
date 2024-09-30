@@ -17,6 +17,21 @@ import {
 export class DocumentsService {
   constructor(private prisma: PrismaService) {}
 
+  async getAllDocumentCategory(): Promise<
+    { category: string; slug: string }[]
+  > {
+    const categories = await this.prisma.document.findMany({
+      select: {
+        category: true,
+      },
+    });
+
+    return categories.map((doc) => ({
+      category: doc.category,
+      slug: generateSlug(doc.category),
+    }));
+  }
+
   async getAllDocument(query: GetDocumentDto): Promise<Document[]> {
     const {
       name,

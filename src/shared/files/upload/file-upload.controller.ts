@@ -10,27 +10,32 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
-import { BusinessSlug, BusinessType, MediaType } from '@common/enums';
+import {
+  BusinessSlug,
+  BusinessType,
+  DocumentCategory,
+  MediaType,
+} from '@common/enums';
 import { JwtGuard } from '@common/guards';
 import { maxSize, maxUpload, storage } from '@common/utils';
 import { FileUploadService } from '@shared/files/upload/file-upload.service';
 
 @UseGuards(JwtGuard)
-@Controller('upload')
+@Controller()
 export class FileUploadController {
   constructor(private fileUpload: FileUploadService) {}
 
   // Upload Blog Media, Document & insert/update business header photo (single upload)
-  @Post()
+  @Post('upload')
   @UseInterceptors(
     FileInterceptor('upload', { storage, limits: { fileSize: maxSize } }),
   )
   async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
     @Query('type', new ParseEnumPipe(MediaType, { optional: true }))
     type: MediaType,
     @Query('category')
-    category: string,
-    @UploadedFile() file: Express.Multer.File,
+    category: BusinessSlug | DocumentCategory,
   ): Promise<{ url: string; size: string }> {
     const url = this.fileUpload.uploadFile(file, type, category);
 
@@ -38,7 +43,7 @@ export class FileUploadController {
   }
 
   // upload media for projects, products, service (multiple upload, max 10 per request)
-  @Post('media')
+  @Post('uploads')
   @UseInterceptors(
     FilesInterceptor('uploads', maxUpload, {
       storage,
@@ -46,13 +51,20 @@ export class FileUploadController {
     }),
   )
   async uploadFiles(
-    @Query('business', new ParseEnumPipe(BusinessSlug, { optional: true }))
-    businessSlug: BusinessSlug,
-    @Query('type', new ParseEnumPipe(BusinessType, { optional: true }))
-    type: BusinessType,
     @UploadedFiles() files: Express.Multer.File[],
+    @Query('type', new ParseEnumPipe(MediaType, { optional: true }))
+    type: MediaType,
+    @Query('category', new ParseEnumPipe(BusinessSlug, { optional: true }))
+    businessSlug: BusinessSlug,
+    @Query('business-type', new ParseEnumPipe(BusinessType, { optional: true }))
+    businessType: BusinessType,
   ): Promise<{ uploadedFiles: { name: string; url: string; size: string }[] }> {
-    const urls = await this.fileUpload.uploadFiles(files, businessSlug, type);
+    const urls = await this.fileUpload.uploadFiles(
+      files,
+      type,
+      businessSlug,
+      businessType,
+    );
 
     return urls;
   }

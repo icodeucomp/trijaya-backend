@@ -133,3 +133,39 @@ model Service {
 
   @@map("services")
 }
+
+model ContactUs {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fullName    String?
+  email       String
+  phoneNumber String?
+  message     String
+
+  @@map("contactUs")
+}
+
+model SuccessJob {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobId     String
+  name      String
+  data      Json
+
+  @@map("successJobs")
+}
+
+model FailedJob {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobId     String
+  name      String
+  error     String
+  data      Json
+
+  @@map("failedJobs")
+}

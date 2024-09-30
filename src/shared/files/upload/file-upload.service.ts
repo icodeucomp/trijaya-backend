@@ -2,7 +2,12 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 
-import { BusinessSlug, MediaType } from '@common/enums';
+import {
+  BusinessSlug,
+  BusinessType,
+  DocumentCategory,
+  MediaType,
+} from '@common/enums';
 import { generateFileSize } from '@common/utils';
 import { S3Service } from '@shared/s3/s3.service';
 
@@ -19,7 +24,7 @@ export class FileUploadService {
   async uploadFile(
     file: Express.Multer.File,
     type: MediaType,
-    category: BusinessSlug | string,
+    category: BusinessSlug | DocumentCategory,
   ): Promise<{ name: string; url: string; size: string }> {
     if (!file) {
       throw new BadRequestException('please input file');
@@ -28,6 +33,15 @@ export class FileUploadService {
     if (type === MediaType.Business && !this.isValidBusinessSlug(category)) {
       throw new BadRequestException(
         `Upload failed, no business named ${category}`,
+      );
+    }
+
+    if (
+      type === MediaType.Document &&
+      !this.isValidDocumentCategory(category)
+    ) {
+      throw new BadRequestException(
+        `Upload failed, no document with category ${category}`,
       );
     }
 
@@ -61,19 +75,35 @@ export class FileUploadService {
 
   async uploadFiles(
     files: Express.Multer.File[],
-    businessSlug: string,
-    type: string,
+    type: MediaType,
+    businessSlug: BusinessSlug,
+    businessType: BusinessType,
   ): Promise<{ uploadedFiles: { name: string; url: string; size: string }[] }> {
     const uploadedFiles = [];
-    let folderName: string = 'media';
 
     if (!files) {
       throw new BadRequestException('please input file');
     }
 
-    if (businessSlug && type) {
-      folderName = `business/${businessSlug}/${type}`;
+    if (type !== MediaType.Business && type !== MediaType.Media) {
+      throw new BadRequestException(
+        'Only media, product, project, and service can upload multiple',
+      );
     }
+
+    if (type == MediaType.Business) {
+      if (!businessSlug) {
+        throw new BadRequestException('Please input business name');
+      }
+      if (!businessType) {
+        throw new BadRequestException('Please input business type');
+      }
+    }
+
+    const folderName =
+      type === MediaType.Business
+        ? `${type}/${businessSlug}/${businessType}`
+        : `${type}`;
 
     for (const file of files) {
       const fileStream = fs.createReadStream(file.path);
@@ -121,5 +151,11 @@ export class FileUploadService {
 
   private isValidBusinessSlug(businessSlug: string): boolean {
     return Object.values(BusinessSlug).includes(businessSlug as BusinessSlug);
+  }
+
+  private isValidDocumentCategory(documentCategory: string): boolean {
+    return Object.values(DocumentCategory).includes(
+      documentCategory as DocumentCategory,
+    );
   }
 }

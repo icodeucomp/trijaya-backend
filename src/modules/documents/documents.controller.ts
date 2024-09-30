@@ -19,6 +19,8 @@ import {
   UpdateDocumentDto,
 } from '@modules/documents/dtos';
 import { DocumentsService } from '@modules/documents/documents.service';
+import { ResponsePayload } from '@common/interfaces';
+import { Document } from '@prisma/client';
 
 @UseGuards(JwtGuard)
 @Controller('documents')
@@ -26,8 +28,20 @@ export class DocumentsController {
   constructor(private documentService: DocumentsService) {}
 
   @Public()
+  @Get('categories')
+  async getAllDocumentCategory(): Promise<
+    ResponsePayload<{ category: string; slug: string }[]>
+  > {
+    const categories = await this.documentService.getAllDocumentCategory();
+
+    return successResponsePayload('Get all document category', categories);
+  }
+
+  @Public()
   @Get()
-  async getAllDocument(@Query() query: GetDocumentDto) {
+  async getAllDocument(
+    @Query() query: GetDocumentDto,
+  ): Promise<ResponsePayload<Document[]>> {
     const documents = await this.documentService.getAllDocument(query);
 
     return successResponsePayload('Get all document', documents);
@@ -35,7 +49,9 @@ export class DocumentsController {
 
   @Public()
   @Get(':documentSlug')
-  async getDocumentBySlug(@Param('documentSlug') documentSlug: string) {
+  async getDocumentBySlug(
+    @Param('documentSlug') documentSlug: string,
+  ): Promise<ResponsePayload<Document>> {
     const document = await this.documentService.getDocumentBySlug(documentSlug);
 
     return successResponsePayload(
@@ -48,8 +64,7 @@ export class DocumentsController {
   async createDocument(
     @GetUser('id') uploaderId: number,
     @Body() dto: CreateDocumentDto,
-  ) {
-    console.log({ uploaderId });
+  ): Promise<ResponsePayload<Document>> {
     const document = await this.documentService.createDocument(uploaderId, dto);
 
     return successResponsePayload('Create document', document);
@@ -60,7 +75,7 @@ export class DocumentsController {
     @GetUser('id') uploaderId: number,
     @Param('documentSlug') documentSlug: string,
     @Body() dto: UpdateDocumentDto,
-  ) {
+  ): Promise<ResponsePayload<Document>> {
     const document = await this.documentService.updateDocumentBySlug(
       documentSlug,
       uploaderId,
@@ -74,7 +89,9 @@ export class DocumentsController {
   }
 
   @Delete(':documentSlug')
-  async deleteDocumentBySlug(@Param('documentSlug') documentSlug: string) {
+  async deleteDocumentBySlug(
+    @Param('documentSlug') documentSlug: string,
+  ): Promise<ResponsePayload<Document>> {
     const document =
       await this.documentService.deleteDocumentBySlug(documentSlug);
 

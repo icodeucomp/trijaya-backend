@@ -1,13 +1,14 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { DocumentCategory } from '@common/enums';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateDocumentDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
+  @IsEnum(DocumentCategory)
   @IsNotEmpty()
-  category: string;
+  category: DocumentCategory;
 
   @IsString()
   @IsNotEmpty()

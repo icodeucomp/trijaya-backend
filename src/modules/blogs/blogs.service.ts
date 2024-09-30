@@ -111,7 +111,7 @@ export class BlogsService {
     return blog;
   }
 
-  async updateBlogBySlug(blogSlug: string, dto: UpdateBlogDto) {
+  async updateBlogBySlug(blogSlug: string, dto: UpdateBlogDto): Promise<Blog> {
     const existingBlog = await this.getBlogBySlug(blogSlug);
 
     const updatedData: UpdateBlogDto = { ...dto };

@@ -12,10 +12,23 @@ import {
   GetBusinessDto,
   UpdateBusinessDto,
 } from '@modules/business/dtos';
+import { BusinessMetadata } from '@common/interfaces';
 
 @Injectable()
 export class BusinessService {
   constructor(private prisma: PrismaService) {}
+
+  async getAllBusinessMetadata(): Promise<BusinessMetadata[]> {
+    const business = await this.prisma.business.findMany({
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+      },
+    });
+
+    return business;
+  }
 
   async getAllBusiness(query: GetBusinessDto): Promise<Business[]> {
     const { title, dateStart, dateEnd, sort, order, page, limit } = query;
@@ -131,7 +144,10 @@ export class BusinessService {
     return business;
   }
 
-  async updateBusinessBySlug(businessslug: string, dto: UpdateBusinessDto) {
+  async updateBusinessBySlug(
+    businessslug: string,
+    dto: UpdateBusinessDto,
+  ): Promise<Business> {
     const existingBusiness = await this.getBusinessBySlug(businessslug);
 
     const updatedData: UpdateBusinessDto = { ...dto };

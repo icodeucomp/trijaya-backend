@@ -9,9 +9,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Business } from '@prisma/client';
 
 import { Public } from '@common/decorators';
 import { JwtGuard } from '@common/guards';
+import { BusinessMetadata, ResponsePayload } from '@common/interfaces';
 import { successResponsePayload } from '@common/utils';
 import {
   CreateBusinessDto,
@@ -26,8 +28,18 @@ export class BusinessController {
   constructor(private businessService: BusinessService) {}
 
   @Public()
+  @Get('metadata')
+  async getAllBusinessMetadata(): Promise<ResponsePayload<BusinessMetadata[]>> {
+    const business = await this.businessService.getAllBusinessMetadata();
+
+    return successResponsePayload('Get all business metadata', business);
+  }
+
+  @Public()
   @Get()
-  async getAllBusiness(@Query() query: GetBusinessDto) {
+  async getAllBusiness(
+    @Query() query: GetBusinessDto,
+  ): Promise<ResponsePayload<Business[]>> {
     const business = await this.businessService.getAllBusiness(query);
 
     return successResponsePayload('Get all business', business);
@@ -35,7 +47,9 @@ export class BusinessController {
 
   @Public()
   @Get(':businessSlug')
-  async getBusinessBySlug(@Param('businessSlug') businessSlug: string) {
+  async getBusinessBySlug(
+    @Param('businessSlug') businessSlug: string,
+  ): Promise<ResponsePayload<Business>> {
     const business = await this.businessService.getBusinessBySlug(businessSlug);
 
     return successResponsePayload(
@@ -45,7 +59,9 @@ export class BusinessController {
   }
 
   @Post()
-  async createBusiness(@Body() dto: CreateBusinessDto) {
+  async createBusiness(
+    @Body() dto: CreateBusinessDto,
+  ): Promise<ResponsePayload<Business>> {
     const business = await this.businessService.createBusiness(dto);
 
     return successResponsePayload('Create business', business);
@@ -55,7 +71,7 @@ export class BusinessController {
   async updateBusinessBySlug(
     @Param('businessSlug') businessSlug: string,
     @Body() dto: UpdateBusinessDto,
-  ) {
+  ): Promise<ResponsePayload<Business>> {
     const business = await this.businessService.updateBusinessBySlug(
       businessSlug,
       dto,
@@ -68,7 +84,9 @@ export class BusinessController {
   }
 
   @Delete(':businessSlug')
-  async deleteBusinessBySlug(@Param('businessSlug') businessSlug: string) {
+  async deleteBusinessBySlug(
+    @Param('businessSlug') businessSlug: string,
+  ): Promise<ResponsePayload<Business>> {
     const business =
       await this.businessService.deleteBusinessBySlug(businessSlug);
 

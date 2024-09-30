@@ -7,6 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Admin } from '@prisma/client';
 
 import { GetUser } from '@common/decorators';
 import { JwtGuard, JwtRefreshGuard } from '@common/guards';
@@ -31,7 +32,9 @@ export class AuthenticationController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGuard)
   @Post('logout')
-  async logout(@GetUser('id', ParseIntPipe) adminId: number): Promise<any> {
+  async logout(
+    @GetUser('id', ParseIntPipe) adminId: number,
+  ): Promise<ResponsePayload<Admin>> {
     const admin = await this.authenticationService.logout(adminId);
 
     return successResponsePayload('Admin logout', admin);
@@ -43,7 +46,7 @@ export class AuthenticationController {
   async refreshTokens(
     @GetUser('sub', ParseIntPipe) adminId: number,
     @GetUser('refreshToken') refreshToken: string,
-  ) {
+  ): Promise<ResponsePayload<JwtTokens>> {
     const updatedRefreshToken = await this.authenticationService.refreshTokens(
       adminId,
       refreshToken,
