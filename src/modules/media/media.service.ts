@@ -77,8 +77,24 @@ export class MediaService {
 
   async createMedia(
     uploaderId: number,
-    dtos: CreateMediaDto[],
-  ): Promise<Prisma.BatchPayload> {
+    dtos: CreateMediaDto[] | CreateMediaDto,
+  ): Promise<Prisma.BatchPayload | Media> {
+    if (!Array.isArray(dtos)) {
+      const name = await this.generateMediaName(dtos.name);
+      const slug = generateSlug(name);
+      const media = await this.prisma.media.create({
+        data: {
+          name,
+          slug,
+          url: dtos.url,
+          size: dtos.size,
+          uploaderId,
+        },
+      });
+
+      return media;
+    }
+
     const mediaData = await Promise.all(
       dtos.map(async (dto) => {
         const name = await this.generateMediaName(dto.name);

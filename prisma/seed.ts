@@ -8,13 +8,7 @@ const prisma = new PrismaClient();
 async function main() {
   const totalBusinessItem: number = 5;
 
-  const documentCategories = [
-    'Financial Reports',
-    'Project Proposals',
-    'Technical Documentation',
-    'Human Resources Policies',
-    'Marketing Strategies',
-  ];
+  const documentCategories = ['legality', 'certification', 'award'];
 
   const businessData = [
     {

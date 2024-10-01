@@ -2,7 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Document } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { DocumentCategory } from '@common/enums';
 import {
+  capitalizedWord,
   generateDateRange,
   generatePagination,
   generateSlug,
@@ -20,15 +22,11 @@ export class DocumentsService {
   async getAllDocumentCategory(): Promise<
     { category: string; slug: string }[]
   > {
-    const categories = await this.prisma.document.findMany({
-      select: {
-        category: true,
-      },
-    });
+    const categories = Object.values(DocumentCategory);
 
-    return categories.map((doc) => ({
-      category: doc.category,
-      slug: generateSlug(doc.category),
+    return categories.map((category) => ({
+      category: capitalizedWord(category),
+      slug: generateSlug(category),
     }));
   }
 
