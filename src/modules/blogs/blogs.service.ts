@@ -150,6 +150,8 @@ export class BlogsService {
     const regex = /<img [^>]*src="([^"]+)"/;
     const firstImage = content.match(regex);
 
-    return firstImage[1] ?? this.config.get<string>('DEFAULT_IMAGE');
+    return firstImage
+      ? firstImage[1]
+      : this.config.get<string>('DEFAULT_IMAGE');
   }
 }
