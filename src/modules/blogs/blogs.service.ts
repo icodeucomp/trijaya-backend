@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Blog } from '@prisma/client';
+import { Blog, Prisma } from '@prisma/client';
 
 import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
 import {
@@ -18,24 +23,12 @@ export class BlogsService {
   ) {}
 
   async getAllBlog(query: GetBlogDto): Promise<Blog[]> {
-    const {
-      title,
-      author,
-      dateCreateStart,
-      dateCreateEnd,
-      dateUpdateStart,
-      dateUpdateEnd,
-      sort,
-      order,
-      page,
-      limit,
-    } = query;
+    const { title, author, dateStart, dateEnd, sort, order, page, limit } =
+      query;
     const { skip, take } = generatePagination(page, limit);
 
-    const { start: dateCreatedStart } = generateDateRange(dateCreateStart);
-    const { end: dateCreatedEnd } = generateDateRange(dateCreateEnd);
-    const { start: dateUpdatedStart } = generateDateRange(dateUpdateStart);
-    const { end: dateUpdatedEnd } = generateDateRange(dateUpdateEnd);
+    const { start: dateStarted } = generateDateRange(dateStart);
+    const { end: dateEnded } = generateDateRange(dateEnd);
 
     const blogs = await this.prisma.blog.findMany({
       where: {
@@ -43,18 +36,11 @@ export class BlogsService {
         ...(author && {
           authorId: Number(author),
         }),
-        ...(dateCreateStart &&
-          dateCreateEnd && {
+        ...(dateStart &&
+          dateEnd && {
             uploadedAt: {
-              gte: dateCreatedStart,
-              lt: dateCreatedEnd,
-            },
-          }),
-        ...(dateUpdateStart &&
-          dateUpdateEnd && {
-            uploadedAt: {
-              gte: dateUpdatedStart,
-              lt: dateUpdatedEnd,
+              gte: dateStarted,
+              lt: dateEnded,
             },
           }),
       },
@@ -98,17 +84,25 @@ export class BlogsService {
     const slug = generateSlug(dto.title);
     const imageHeader = this.extractImageHeaderFromContent(dto.content);
 
-    const blog = await this.prisma.blog.create({
-      data: {
-        title: dto.title,
-        slug,
-        content: dto.content,
-        imageHeader,
-        authorId: authorId,
-      },
-    });
-
-    return blog;
+    try {
+      const blog = await this.prisma.blog.create({
+        data: {
+          title: dto.title,
+          slug,
+          content: dto.content,
+          imageHeader,
+          authorId: authorId,
+        },
+      });
+      return blog;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated blog title');
+        }
+      }
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async updateBlogBySlug(blogSlug: string, dto: UpdateBlogDto): Promise<Blog> {

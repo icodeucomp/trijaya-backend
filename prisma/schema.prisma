@@ -30,7 +30,7 @@ model Blog {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title       String
+  title       String  @unique
   slug        String
   content     String
   imageHeader String?
@@ -61,7 +61,7 @@ model Media {
   id         Int      @id @default(autoincrement())
   uploadedAt DateTime @default(now()) @updatedAt
 
-  name String
+  name String @unique
   slug String
   url  String
   size String

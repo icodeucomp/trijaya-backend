@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Admin } from '@prisma/client';
+import { Admin, Prisma } from '@prisma/client';
 import * as argon from 'argon2';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
@@ -151,8 +151,10 @@ export class AdminService {
 
       return admin;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Admin not found`);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(`Admin not found`);
+        }
       }
       throw new InternalServerErrorException(error.message);
     }
@@ -168,8 +170,10 @@ export class AdminService {
 
       return admin;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Admin not found`);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(`Admin not found`);
+        }
       }
       throw new InternalServerErrorException(error.message);
     }

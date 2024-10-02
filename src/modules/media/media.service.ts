@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Media, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
@@ -79,43 +84,53 @@ export class MediaService {
     uploaderId: number,
     dtos: CreateMediaDto[] | CreateMediaDto,
   ): Promise<Prisma.BatchPayload | Media> {
-    if (!Array.isArray(dtos)) {
-      const name = await this.generateMediaName(dtos.name);
-      const slug = generateSlug(name);
-      const media = await this.prisma.media.create({
-        data: {
-          name,
-          slug,
-          url: dtos.url,
-          size: dtos.size,
-          uploaderId,
-        },
+    try {
+      if (!Array.isArray(dtos)) {
+        const name = await this.generateMediaName(dtos.name);
+        const slug = generateSlug(name);
+        const media = await this.prisma.media.create({
+          data: {
+            name,
+            slug,
+            url: dtos.url,
+            size: dtos.size,
+            uploaderId,
+          },
+        });
+
+        return media;
+      }
+
+      const mediaData = await Promise.all(
+        dtos.map(async (dto) => {
+          const name = await this.generateMediaName(dto.name);
+          const slug = generateSlug(name);
+          return {
+            name,
+            slug,
+            url: dto.url,
+            size: dto.size,
+            uploaderId,
+          };
+        }),
+      );
+
+      const media = await this.prisma.$transaction(async (prisma) => {
+        return await prisma.media.createMany({
+          data: mediaData,
+          skipDuplicates: true,
+        });
       });
 
       return media;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated blog title');
+        }
+      }
+      throw new InternalServerErrorException(error.message);
     }
-
-    const mediaData = await Promise.all(
-      dtos.map(async (dto) => {
-        const name = await this.generateMediaName(dto.name);
-        const slug = generateSlug(name);
-        return {
-          name,
-          slug,
-          url: dto.url,
-          size: dto.size,
-          uploaderId,
-        };
-      }),
-    );
-
-    const media = await this.prisma.$transaction(async (prisma) => {
-      return await prisma.media.createMany({
-        data: mediaData,
-      });
-    });
-
-    return media;
   }
 
   async updateMediaBySlug(
