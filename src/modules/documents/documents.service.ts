@@ -32,7 +32,7 @@ export class DocumentsService {
 
   async getAllDocument(query: GetDocumentDto): Promise<Document[]> {
     const {
-      name,
+      title,
       category,
       uploadedBy,
       dateStart,
@@ -50,7 +50,7 @@ export class DocumentsService {
     const documents = this.prisma.document.findMany({
       where: {
         category,
-        ...(name && { name: { contains: name, mode: 'insensitive' } }),
+        ...(title && { name: { contains: title, mode: 'insensitive' } }),
         ...(uploadedBy && {
           uploaderId: Number(uploadedBy),
         }),

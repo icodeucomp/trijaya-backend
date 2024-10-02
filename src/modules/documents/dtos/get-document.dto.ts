@@ -5,7 +5,7 @@ import { DocumentSortBy, OrderBy } from '@common/enums';
 export class GetDocumentDto {
   @IsOptional()
   @IsString()
-  name?: string;
+  title?: string;
 
   @IsOptional()
   @IsString()

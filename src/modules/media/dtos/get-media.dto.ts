@@ -5,7 +5,7 @@ import { MediaSortBy, OrderBy } from '@common/enums';
 export class GetMediaDto {
   @IsOptional()
   @IsString()
-  name?: string;
+  title?: string;
 
   @IsOptional()
   @IsString()

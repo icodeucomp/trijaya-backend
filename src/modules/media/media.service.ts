@@ -18,7 +18,7 @@ export class MediaService {
   constructor(private prisma: PrismaService) {}
 
   async getAllMedia(query: GetMediaDto): Promise<Media[]> {
-    const { name, uploadedBy, dateStart, dateEnd, sort, order, page, limit } =
+    const { title, uploadedBy, dateStart, dateEnd, sort, order, page, limit } =
       query;
     const { skip, take } = generatePagination(page, limit);
 
@@ -27,7 +27,7 @@ export class MediaService {
 
     const medias = this.prisma.media.findMany({
       where: {
-        ...(name && { name: { contains: name, mode: 'insensitive' } }),
+        ...(title && { name: { contains: title, mode: 'insensitive' } }),
         ...(uploadedBy && {
           uploaderId: Number(uploadedBy),
         }),
