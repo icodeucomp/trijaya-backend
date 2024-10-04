@@ -3,6 +3,7 @@ import { ContactUs } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { MailsService } from '@shared/mails/mails.service';
+import { GetData } from '@common/interfaces';
 import {
   capitalizedWord,
   generateDateRange,
@@ -21,7 +22,7 @@ export class ContactUsService {
     private mailService: MailsService,
   ) {}
 
-  async getAllContactUs(query: GetContactUsDto): Promise<ContactUs[]> {
+  async getAllContactUs(query: GetContactUsDto): Promise<GetData<ContactUs[]>> {
     const {
       fullName,
       email,
@@ -42,36 +43,46 @@ export class ContactUsService {
     const { start: dateUpdatedStart } = generateDateRange(dateUpdateStart);
     const { end: dateUpdatedEnd } = generateDateRange(dateUpdateEnd);
 
-    const blogs = await this.prisma.contactUs.findMany({
-      where: {
-        ...(fullName && {
-          fullName: { contains: fullName, mode: 'insensitive' },
+    const whereCondition: any = {
+      ...(fullName && {
+        fullName: { contains: fullName, mode: 'insensitive' },
+      }),
+      ...(email && { email: { contains: email, mode: 'insensitive' } }),
+      ...(phoneNumber && {
+        phoneNumber: { contains: phoneNumber, mode: 'insensitive' },
+      }),
+      ...(dateCreateStart &&
+        dateCreateEnd && {
+          uploadedAt: {
+            gte: dateCreatedStart,
+            lt: dateCreatedEnd,
+          },
         }),
-        ...(email && { email: { contains: email, mode: 'insensitive' } }),
-        ...(phoneNumber && {
-          phoneNumber: { contains: phoneNumber, mode: 'insensitive' },
+      ...(dateUpdateStart &&
+        dateUpdateEnd && {
+          uploadedAt: {
+            gte: dateUpdatedStart,
+            lt: dateUpdatedEnd,
+          },
         }),
-        ...(dateCreateStart &&
-          dateCreateEnd && {
-            uploadedAt: {
-              gte: dateCreatedStart,
-              lt: dateCreatedEnd,
-            },
-          }),
-        ...(dateUpdateStart &&
-          dateUpdateEnd && {
-            uploadedAt: {
-              gte: dateUpdatedStart,
-              lt: dateUpdatedEnd,
-            },
-          }),
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+    };
 
-    return blogs;
+    const [contactUs, total] = await this.prisma.$transaction([
+      this.prisma.contactUs.findMany({
+        where: whereCondition,
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.contactUs.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      total,
+      data: contactUs,
+    };
   }
 
   async getContactUsById(contactUsId: number): Promise<ContactUs> {

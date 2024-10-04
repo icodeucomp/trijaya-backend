@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { Admin } from '@prisma/client';
 
-import { ResponsePayload } from '@common/interfaces';
 import { JwtGuard } from '@common/guards';
+import { ResponsePayload } from '@common/interfaces';
 import { successResponsePayload } from '@common/utils';
 import {
   CreateAdminDto,
@@ -30,9 +30,9 @@ export class AdminController {
   async getAllAdmin(
     @Query() query: GetAdminDto,
   ): Promise<ResponsePayload<Admin[]>> {
-    const admins = await this.adminService.getAllAdmin(query);
+    const { total, data } = await this.adminService.getAllAdmin(query);
 
-    return successResponsePayload('Get all admin', admins, admins.length);
+    return successResponsePayload('Get all admin', data, total);
   }
 
   // For showing uploader name list in document

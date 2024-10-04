@@ -7,6 +7,7 @@ import {
 import { Media, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -22,7 +23,7 @@ import {
 export class MediaService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllMedia(query: GetMediaDto): Promise<Media[]> {
+  async getAllMedia(query: GetMediaDto): Promise<GetData<Media[]>> {
     const { title, uploadedBy, dateStart, dateEnd, sort, order, page, limit } =
       query;
     const { skip, take } = generatePagination(page, limit);
@@ -30,33 +31,43 @@ export class MediaService {
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const medias = this.prisma.media.findMany({
-      where: {
-        ...(title && { name: { contains: title, mode: 'insensitive' } }),
-        ...(uploadedBy && {
-          uploaderId: Number(uploadedBy),
+    const whereCondition: any = {
+      ...(title && { name: { contains: title, mode: 'insensitive' } }),
+      ...(uploadedBy && {
+        uploaderId: Number(uploadedBy),
+      }),
+      ...(dateStart &&
+        dateEnd && {
+          uploadedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
+          },
         }),
-        ...(dateStart &&
-          dateEnd && {
-            uploadedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
+    };
+
+    const [media, total] = await this.prisma.$transaction([
+      this.prisma.media.findMany({
+        where: whereCondition,
+        include: {
+          uploader: {
+            select: {
+              username: true,
             },
-          }),
-      },
-      include: {
-        uploader: {
-          select: {
-            username: true,
           },
         },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.media.count({
+        where: whereCondition,
+      }),
+    ]);
 
-    return medias;
+    return {
+      total,
+      data: media,
+    };
   }
 
   async getMediaBySlug(mediaSlug: string): Promise<Media> {

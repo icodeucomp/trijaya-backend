@@ -3,6 +3,7 @@ import { Document } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { DocumentCategory } from '@common/enums';
+import { GetData } from '@common/interfaces';
 import {
   capitalizedWord,
   generateDateRange,
@@ -30,7 +31,7 @@ export class DocumentsService {
     }));
   }
 
-  async getAllDocument(query: GetDocumentDto): Promise<Document[]> {
+  async getAllDocument(query: GetDocumentDto): Promise<GetData<Document[]>> {
     const {
       title,
       category,
@@ -47,34 +48,44 @@ export class DocumentsService {
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const documents = this.prisma.document.findMany({
-      where: {
-        category,
-        ...(title && { name: { contains: title, mode: 'insensitive' } }),
-        ...(uploadedBy && {
-          uploaderId: Number(uploadedBy),
+    const whereCondition: any = {
+      category,
+      ...(title && { name: { contains: title, mode: 'insensitive' } }),
+      ...(uploadedBy && {
+        uploaderId: Number(uploadedBy),
+      }),
+      ...(dateStart &&
+        dateEnd && {
+          uploadedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
+          },
         }),
-        ...(dateStart &&
-          dateEnd && {
-            uploadedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
+    };
+
+    const [documents, total] = await this.prisma.$transaction([
+      this.prisma.document.findMany({
+        where: whereCondition,
+        include: {
+          uploader: {
+            select: {
+              username: true,
             },
-          }),
-      },
-      include: {
-        uploader: {
-          select: {
-            username: true,
           },
         },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.document.count({
+        where: whereCondition,
+      }),
+    ]);
 
-    return documents;
+    return {
+      total,
+      data: documents,
+    };
   }
 
   async getDocumentBySlug(documentSlug: string): Promise<Document> {

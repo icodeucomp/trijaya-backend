@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Project } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -17,37 +18,47 @@ import {
 export class ProjectsService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllProject(query: GetProjectDto): Promise<Project[]> {
+  async getAllProject(query: GetProjectDto): Promise<GetData<Project[]>> {
     const { title, dateStart, dateEnd, sort, order, page, limit } = query;
     const { skip, take } = generatePagination(page, limit);
 
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const projects = this.prisma.project.findMany({
-      where: {
-        ...(title && { title: { contains: title, mode: 'insensitive' } }),
-        ...(dateStart &&
-          dateEnd && {
-            updatedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
+    const whereCondition: any = {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(dateStart &&
+        dateEnd && {
+          updatedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
+          },
+        }),
+    };
+
+    const [projects, total] = await this.prisma.$transaction([
+      this.prisma.project.findMany({
+        where: whereCondition,
+        include: {
+          business: {
+            select: {
+              title: true,
             },
-          }),
-      },
-      include: {
-        business: {
-          select: {
-            title: true,
           },
         },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.project.count({
+        where: whereCondition,
+      }),
+    ]);
 
-    return projects;
+    return {
+      total,
+      data: projects,
+    };
   }
 
   async getProjectBySlug(projectSlug: string): Promise<Project> {

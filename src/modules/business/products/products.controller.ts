@@ -10,15 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { Public } from '@common/decorators';
+import { JwtGuard } from '@common/guards';
+import { successResponsePayload } from '@common/utils';
 import {
   CreateProductDto,
   GetProductDto,
   UpdateProductDto,
 } from '@modules/business/products/dtos';
 import { ProductsService } from '@modules/business/products/products.service';
-import { Public } from '@common/decorators';
-import { JwtGuard } from '@common/guards';
-import { successResponsePayload } from '@common/utils';
 
 @UseGuards(JwtGuard)
 @Controller('products')
@@ -28,9 +28,9 @@ export class ProductsController {
   @Public()
   @Get()
   async getAllProduct(@Query() query: GetProductDto) {
-    const products = await this.productService.getAllProduct(query);
+    const { total, data } = await this.productService.getAllProduct(query);
 
-    return successResponsePayload('Get all product', products, products.length);
+    return successResponsePayload('Get all product', data, total);
   }
 
   @Public()

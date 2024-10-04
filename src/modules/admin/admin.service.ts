@@ -7,6 +7,7 @@ import { Admin, Prisma } from '@prisma/client';
 import * as argon from 'argon2';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { GetData } from '@common/interfaces';
 import { generateDateRange, generatePagination } from '@common/utils';
 import {
   CreateAdminDto,
@@ -18,7 +19,7 @@ import {
 export class AdminService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllAdmin(query: GetAdminDto): Promise<Admin[]> {
+  async getAllAdmin(query: GetAdminDto): Promise<GetData<Admin[]>> {
     const {
       username,
       email,
@@ -38,50 +39,60 @@ export class AdminService {
     const { start: dateUpdatedStart } = generateDateRange(dateUpdateStart);
     const { end: dateUpdatedEnd } = generateDateRange(dateUpdateEnd);
 
-    const admins = await this.prisma.admin.findMany({
-      where: {
-        ...(username && {
-          username: { contains: username, mode: 'insensitive' },
+    const whereCondition: any = {
+      ...(username && {
+        username: { contains: username, mode: 'insensitive' },
+      }),
+      ...(email && { email: { contains: email, mode: 'insensitive' } }),
+      ...(dateCreateStart &&
+        dateCreateEnd && {
+          uploadedAt: {
+            gte: dateCreatedStart,
+            lt: dateCreatedEnd,
+          },
         }),
-        ...(email && { email: { contains: email, mode: 'insensitive' } }),
-        ...(dateCreateStart &&
-          dateCreateEnd && {
-            uploadedAt: {
-              gte: dateCreatedStart,
-              lt: dateCreatedEnd,
-            },
-          }),
-        ...(dateUpdateStart &&
-          dateUpdateEnd && {
-            uploadedAt: {
-              gte: dateUpdatedStart,
-              lt: dateUpdatedEnd,
-            },
-          }),
-      },
-      include: {
-        blogs: {
-          select: {
-            title: true,
+      ...(dateUpdateStart &&
+        dateUpdateEnd && {
+          uploadedAt: {
+            gte: dateUpdatedStart,
+            lt: dateUpdatedEnd,
           },
-        },
-        documents: {
-          select: {
-            name: true,
-          },
-        },
-        medias: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        }),
+    };
 
-    return admins;
+    const [admins, total] = await this.prisma.$transaction([
+      this.prisma.admin.findMany({
+        where: whereCondition,
+        include: {
+          blogs: {
+            select: {
+              title: true,
+            },
+          },
+          documents: {
+            select: {
+              name: true,
+            },
+          },
+          medias: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.admin.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      total,
+      data: admins,
+    };
   }
 
   async getAdminByUsername(username: string): Promise<Admin> {

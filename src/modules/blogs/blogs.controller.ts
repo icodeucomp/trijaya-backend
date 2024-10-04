@@ -13,8 +13,8 @@ import { Blog } from '@prisma/client';
 
 import { GetUser, Public } from '@common/decorators';
 import { JwtGuard } from '@common/guards';
-import { successResponsePayload } from '@common/utils';
 import { ResponsePayload } from '@common/interfaces';
+import { successResponsePayload } from '@common/utils';
 import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
 import { BlogsService } from '@modules/blogs/blogs.service';
 
@@ -28,9 +28,9 @@ export class BlogsController {
   async getAllBlog(
     @Query() query: GetBlogDto,
   ): Promise<ResponsePayload<Blog[]>> {
-    const blogs = await this.blogservice.getAllBlog(query);
+    const { total, data } = await this.blogservice.getAllBlog(query);
 
-    return successResponsePayload('Get all blog', blogs, blogs.length);
+    return successResponsePayload('Get all blog', data, total);
   }
 
   @Public()

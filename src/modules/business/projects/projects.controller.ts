@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 
 import { Public } from '@common/decorators';
-import { successResponsePayload } from '@common/utils';
 import { JwtGuard } from '@common/guards';
+import { successResponsePayload } from '@common/utils';
 import {
   CreateProjectDto,
   GetProjectDto,
@@ -28,9 +28,9 @@ export class ProjectsController {
   @Public()
   @Get()
   async getAllProject(@Query() query: GetProjectDto) {
-    const projects = await this.projectService.getAllProject(query);
+    const { total, data } = await this.projectService.getAllProject(query);
 
-    return successResponsePayload('Get all project', projects, projects.length);
+    return successResponsePayload('Get all project', data, total);
   }
 
   @Public()

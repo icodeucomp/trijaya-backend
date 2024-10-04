@@ -9,9 +9,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Document } from '@prisma/client';
 
 import { GetUser, Public } from '@common/decorators';
 import { JwtGuard } from '@common/guards';
+import { ResponsePayload } from '@common/interfaces';
 import { successResponsePayload } from '@common/utils';
 import {
   CreateDocumentDto,
@@ -19,8 +21,6 @@ import {
   UpdateDocumentDto,
 } from '@modules/documents/dtos';
 import { DocumentsService } from '@modules/documents/documents.service';
-import { ResponsePayload } from '@common/interfaces';
-import { Document } from '@prisma/client';
 
 @UseGuards(JwtGuard)
 @Controller('documents')
@@ -42,13 +42,9 @@ export class DocumentsController {
   async getAllDocument(
     @Query() query: GetDocumentDto,
   ): Promise<ResponsePayload<Document[]>> {
-    const documents = await this.documentService.getAllDocument(query);
+    const { total, data } = await this.documentService.getAllDocument(query);
 
-    return successResponsePayload(
-      'Get all document',
-      documents,
-      documents.length,
-    );
+    return successResponsePayload('Get all document', data, total);
   }
 
   @Public()

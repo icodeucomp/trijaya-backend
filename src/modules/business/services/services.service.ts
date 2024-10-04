@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Service } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -17,37 +18,47 @@ import {
 export class ServicesService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllService(query: GetServiceDto): Promise<Service[]> {
+  async getAllService(query: GetServiceDto): Promise<GetData<Service[]>> {
     const { title, dateStart, dateEnd, sort, order, page, limit } = query;
     const { skip, take } = generatePagination(page, limit);
 
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const services = this.prisma.service.findMany({
-      where: {
-        ...(title && { title: { contains: title, mode: 'insensitive' } }),
-        ...(dateStart &&
-          dateEnd && {
-            updatedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
+    const whereCondition: any = {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(dateStart &&
+        dateEnd && {
+          updatedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
+          },
+        }),
+    };
+
+    const [services, total] = await this.prisma.$transaction([
+      this.prisma.service.findMany({
+        where: whereCondition,
+        include: {
+          business: {
+            select: {
+              title: true,
             },
-          }),
-      },
-      include: {
-        business: {
-          select: {
-            title: true,
           },
         },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.service.count({
+        where: whereCondition,
+      }),
+    ]);
 
-    return services;
+    return {
+      total,
+      data: services,
+    };
   }
 
   async getServiceBySlug(serviceSlug: string): Promise<Service> {

@@ -2,52 +2,63 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Product } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
-import {
-  CreateProductDto,
-  GetProductDto,
-  UpdateProductDto,
-} from '@modules/business/products/dtos';
+import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
   generateSlug,
 } from '@common/utils';
+import {
+  CreateProductDto,
+  GetProductDto,
+  UpdateProductDto,
+} from '@modules/business/products/dtos';
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllProduct(query: GetProductDto): Promise<Product[]> {
+  async getAllProduct(query: GetProductDto): Promise<GetData<Product[]>> {
     const { title, dateStart, dateEnd, sort, order, page, limit } = query;
     const { skip, take } = generatePagination(page, limit);
 
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const products = this.prisma.product.findMany({
-      where: {
-        ...(title && { title: { contains: title, mode: 'insensitive' } }),
-        ...(dateStart &&
-          dateEnd && {
-            updatedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
+    const whereCondition: any = {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(dateStart &&
+        dateEnd && {
+          updatedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
+          },
+        }),
+    };
+
+    const [products, total] = await this.prisma.$transaction([
+      this.prisma.product.findMany({
+        where: whereCondition,
+        include: {
+          business: {
+            select: {
+              title: true,
             },
-          }),
-      },
-      include: {
-        business: {
-          select: {
-            title: true,
           },
         },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.product.count({
+        where: whereCondition,
+      }),
+    ]);
 
-    return products;
+    return {
+      total,
+      data: products,
+    };
   }
 
   async getProductBySlug(productSlug: string): Promise<Product> {

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Business } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { BusinessMetadata, GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -12,7 +13,6 @@ import {
   GetBusinessDto,
   UpdateBusinessDto,
 } from '@modules/business/dtos';
-import { BusinessMetadata } from '@common/interfaces';
 
 @Injectable()
 export class BusinessService {
@@ -30,59 +30,69 @@ export class BusinessService {
     return business;
   }
 
-  async getAllBusiness(query: GetBusinessDto): Promise<Business[]> {
+  async getAllBusiness(query: GetBusinessDto): Promise<GetData<Business[]>> {
     const { title, dateStart, dateEnd, sort, order, page, limit } = query;
     const { skip, take } = generatePagination(page, limit);
 
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const businesss = this.prisma.business.findMany({
-      where: {
-        ...(title && { title: { contains: title, mode: 'insensitive' } }),
-        ...(dateStart &&
-          dateEnd && {
-            updatedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
-            },
-          }),
-      },
-      include: {
-        Project: {
-          include: {
-            business: {
-              select: {
-                title: true,
-              },
-            },
+    const whereCondition: any = {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(dateStart &&
+        dateEnd && {
+          updatedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
           },
-        },
-        Product: {
-          include: {
-            business: {
-              select: {
-                title: true,
-              },
-            },
-          },
-        },
-        Service: {
-          include: {
-            business: {
-              select: {
-                title: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        }),
+    };
 
-    return businesss;
+    const [business, total] = await this.prisma.$transaction([
+      this.prisma.business.findMany({
+        where: whereCondition,
+        include: {
+          Project: {
+            include: {
+              business: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+          Product: {
+            include: {
+              business: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+          Service: {
+            include: {
+              business: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.business.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      total,
+      data: business,
+    };
   }
 
   async getBusinessBySlug(businessSlug: string): Promise<Business> {

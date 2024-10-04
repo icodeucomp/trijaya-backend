@@ -8,12 +8,13 @@ import { ConfigService } from '@nestjs/config';
 import { Blog, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
-import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
+import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
   generateSlug,
 } from '@common/utils';
+import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
 
 @Injectable()
 export class BlogsService {
@@ -22,7 +23,7 @@ export class BlogsService {
     private config: ConfigService,
   ) {}
 
-  async getAllBlog(query: GetBlogDto): Promise<Blog[]> {
+  async getAllBlog(query: GetBlogDto): Promise<GetData<Blog[]>> {
     const { title, author, dateStart, dateEnd, sort, order, page, limit } =
       query;
     const { skip, take } = generatePagination(page, limit);
@@ -30,33 +31,34 @@ export class BlogsService {
     const { start: dateStarted } = generateDateRange(dateStart);
     const { end: dateEnded } = generateDateRange(dateEnd);
 
-    const blogs = await this.prisma.blog.findMany({
-      where: {
-        ...(title && { title: { contains: title, mode: 'insensitive' } }),
-        ...(author && {
-          authorId: Number(author),
-        }),
-        ...(dateStart &&
-          dateEnd && {
-            uploadedAt: {
-              gte: dateStarted,
-              lt: dateEnded,
-            },
-          }),
-      },
-      include: {
-        author: {
-          select: {
-            username: true,
+    const whereCondition: any = {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(author && { authorId: Number(author) }),
+      ...(dateStart &&
+        dateEnd && {
+          uploadedAt: {
+            gte: dateStarted,
+            lt: dateEnded,
           },
-        },
-      },
-      orderBy: { [sort]: order },
-      skip,
-      take,
-    });
+        }),
+    };
 
-    return blogs;
+    const [blogs, total] = await this.prisma.$transaction([
+      this.prisma.blog.findMany({
+        where: whereCondition,
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      this.prisma.blog.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      total,
+      data: blogs,
+    };
   }
 
   async getBlogBySlug(blogSlug: string): Promise<Blog> {
