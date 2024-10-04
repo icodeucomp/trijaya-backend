@@ -30,9 +30,9 @@ export class AdminController {
   async getAllAdmin(
     @Query() query: GetAdminDto,
   ): Promise<ResponsePayload<Admin[]>> {
-    const { total, data } = await this.adminService.getAllAdmin(query);
+    const { total, data, newest } = await this.adminService.getAllAdmin(query);
 
-    return successResponsePayload('Get all admin', data, total);
+    return successResponsePayload('Get all admin', data, total, newest);
   }
 
   // For showing uploader name list in document
@@ -44,6 +44,7 @@ export class AdminController {
     return successResponsePayload(
       'Get all admin id and username',
       adminIdAndUsernames,
+      1,
     );
   }
 

@@ -28,9 +28,10 @@ export class ProjectsController {
   @Public()
   @Get()
   async getAllProject(@Query() query: GetProjectDto) {
-    const { total, data } = await this.projectService.getAllProject(query);
+    const { total, data, newest } =
+      await this.projectService.getAllProject(query);
 
-    return successResponsePayload('Get all project', data, total);
+    return successResponsePayload('Get all project', data, total, newest);
   }
 
   @Public()

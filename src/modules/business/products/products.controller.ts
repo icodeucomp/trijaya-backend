@@ -28,9 +28,10 @@ export class ProductsController {
   @Public()
   @Get()
   async getAllProduct(@Query() query: GetProductDto) {
-    const { total, data } = await this.productService.getAllProduct(query);
+    const { total, data, newest } =
+      await this.productService.getAllProduct(query);
 
-    return successResponsePayload('Get all product', data, total);
+    return successResponsePayload('Get all product', data, total, newest);
   }
 
   @Public()

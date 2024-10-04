@@ -2,10 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Product } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
+  generateReadableDateTime,
   generateSlug,
 } from '@common/utils';
 import {
@@ -36,7 +38,7 @@ export class ProductsService {
         }),
     };
 
-    const [products, total] = await this.prisma.$transaction([
+    const [products, total, newest] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where: whereCondition,
         include: {
@@ -53,11 +55,21 @@ export class ProductsService {
       this.prisma.product.count({
         where: whereCondition,
       }),
+      this.prisma.product.findFirst({
+        where: whereCondition,
+        orderBy: {
+          updatedAt: OrderBy.Desc,
+        },
+        select: {
+          updatedAt: true,
+        },
+      }),
     ]);
 
     return {
       total,
       data: products,
+      newest: generateReadableDateTime(newest?.updatedAt),
     };
   }
 

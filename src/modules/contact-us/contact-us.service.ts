@@ -3,11 +3,13 @@ import { ContactUs } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { MailsService } from '@shared/mails/mails.service';
+import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   capitalizedWord,
   generateDateRange,
   generatePagination,
+  generateReadableDateTime,
 } from '@common/utils';
 import {
   CreateContactUsDto,
@@ -67,7 +69,7 @@ export class ContactUsService {
         }),
     };
 
-    const [contactUs, total] = await this.prisma.$transaction([
+    const [contactUs, total, newest] = await this.prisma.$transaction([
       this.prisma.contactUs.findMany({
         where: whereCondition,
         orderBy: { [sort]: order },
@@ -77,11 +79,21 @@ export class ContactUsService {
       this.prisma.contactUs.count({
         where: whereCondition,
       }),
+      this.prisma.contactUs.findFirst({
+        where: whereCondition,
+        orderBy: {
+          updatedAt: OrderBy.Desc,
+        },
+        select: {
+          updatedAt: true,
+        },
+      }),
     ]);
 
     return {
       total,
       data: contactUs,
+      newest: generateReadableDateTime(newest?.updatedAt),
     };
   }
 

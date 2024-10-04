@@ -28,9 +28,9 @@ export class BlogsController {
   async getAllBlog(
     @Query() query: GetBlogDto,
   ): Promise<ResponsePayload<Blog[]>> {
-    const { total, data } = await this.blogservice.getAllBlog(query);
+    const { total, data, newest } = await this.blogservice.getAllBlog(query);
 
-    return successResponsePayload('Get all blog', data, total);
+    return successResponsePayload('Get all blog', data, total, newest);
   }
 
   @Public()

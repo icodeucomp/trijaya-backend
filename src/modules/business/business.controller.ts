@@ -40,9 +40,10 @@ export class BusinessController {
   async getAllBusiness(
     @Query() query: GetBusinessDto,
   ): Promise<ResponsePayload<Business[]>> {
-    const { total, data } = await this.businessService.getAllBusiness(query);
+    const { total, data, newest } =
+      await this.businessService.getAllBusiness(query);
 
-    return successResponsePayload('Get all business', data, total);
+    return successResponsePayload('Get all business', data, total, newest);
   }
 
   @Public()

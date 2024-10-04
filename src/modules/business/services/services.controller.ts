@@ -28,9 +28,10 @@ export class ServicesController {
   @Public()
   @Get()
   async getAllService(@Query() query: GetServiceDto) {
-    const { total, data } = await this.serviceService.getAllService(query);
+    const { total, data, newest } =
+      await this.serviceService.getAllService(query);
 
-    return successResponsePayload('Get all service', data, total);
+    return successResponsePayload('Get all service', data, total, newest);
   }
 
   @Public()

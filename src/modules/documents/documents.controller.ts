@@ -42,9 +42,10 @@ export class DocumentsController {
   async getAllDocument(
     @Query() query: GetDocumentDto,
   ): Promise<ResponsePayload<Document[]>> {
-    const { total, data } = await this.documentService.getAllDocument(query);
+    const { total, data, newest } =
+      await this.documentService.getAllDocument(query);
 
-    return successResponsePayload('Get all document', data, total);
+    return successResponsePayload('Get all document', data, total, newest);
   }
 
   @Public()

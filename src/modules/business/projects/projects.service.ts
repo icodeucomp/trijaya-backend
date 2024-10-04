@@ -2,10 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Project } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
+  generateReadableDateTime,
   generateSlug,
 } from '@common/utils';
 import {
@@ -36,7 +38,7 @@ export class ProjectsService {
         }),
     };
 
-    const [projects, total] = await this.prisma.$transaction([
+    const [projects, total, newest] = await this.prisma.$transaction([
       this.prisma.project.findMany({
         where: whereCondition,
         include: {
@@ -53,11 +55,21 @@ export class ProjectsService {
       this.prisma.project.count({
         where: whereCondition,
       }),
+      this.prisma.project.findFirst({
+        where: whereCondition,
+        orderBy: {
+          updatedAt: OrderBy.Desc,
+        },
+        select: {
+          updatedAt: true,
+        },
+      }),
     ]);
 
     return {
       total,
       data: projects,
+      newest: generateReadableDateTime(newest?.updatedAt),
     };
   }
 

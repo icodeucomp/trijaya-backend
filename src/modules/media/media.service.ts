@@ -7,10 +7,12 @@ import {
 import { Media, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
+  generateReadableDateTime,
   generateSlug,
 } from '@common/utils';
 import {
@@ -45,7 +47,7 @@ export class MediaService {
         }),
     };
 
-    const [media, total] = await this.prisma.$transaction([
+    const [media, total, newest] = await this.prisma.$transaction([
       this.prisma.media.findMany({
         where: whereCondition,
         include: {
@@ -62,11 +64,21 @@ export class MediaService {
       this.prisma.media.count({
         where: whereCondition,
       }),
+      this.prisma.media.findFirst({
+        where: whereCondition,
+        orderBy: {
+          uploadedAt: OrderBy.Desc,
+        },
+        select: {
+          uploadedAt: true,
+        },
+      }),
     ]);
 
     return {
       total,
       data: media,
+      newest: generateReadableDateTime(newest?.uploadedAt),
     };
   }
 

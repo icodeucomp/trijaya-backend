@@ -7,8 +7,13 @@ import { Admin, Prisma } from '@prisma/client';
 import * as argon from 'argon2';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
-import { generateDateRange, generatePagination } from '@common/utils';
+import {
+  generateDateRange,
+  generatePagination,
+  generateReadableDateTime,
+} from '@common/utils';
 import {
   CreateAdminDto,
   GetAdminDto,
@@ -60,7 +65,7 @@ export class AdminService {
         }),
     };
 
-    const [admins, total] = await this.prisma.$transaction([
+    const [admins, total, newest] = await this.prisma.$transaction([
       this.prisma.admin.findMany({
         where: whereCondition,
         include: {
@@ -87,11 +92,21 @@ export class AdminService {
       this.prisma.admin.count({
         where: whereCondition,
       }),
+      this.prisma.admin.findFirst({
+        where: whereCondition,
+        orderBy: {
+          updatedAt: OrderBy.Desc,
+        },
+        select: {
+          updatedAt: true,
+        },
+      }),
     ]);
 
     return {
       total,
       data: admins,
+      newest: generateReadableDateTime(newest?.updatedAt),
     };
   }
 

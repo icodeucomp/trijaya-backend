@@ -8,10 +8,12 @@ import { ConfigService } from '@nestjs/config';
 import { Blog, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
+  generateReadableDateTime,
   generateSlug,
 } from '@common/utils';
 import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
@@ -43,7 +45,7 @@ export class BlogsService {
         }),
     };
 
-    const [blogs, total] = await this.prisma.$transaction([
+    const [blogs, total, newest] = await this.prisma.$transaction([
       this.prisma.blog.findMany({
         where: whereCondition,
         orderBy: { [sort]: order },
@@ -53,11 +55,21 @@ export class BlogsService {
       this.prisma.blog.count({
         where: whereCondition,
       }),
+      this.prisma.blog.findFirst({
+        where: whereCondition,
+        orderBy: {
+          updatedAt: OrderBy.Desc,
+        },
+        select: {
+          updatedAt: true,
+        },
+      }),
     ]);
 
     return {
       total,
       data: blogs,
+      newest: generateReadableDateTime(newest?.updatedAt),
     };
   }
 

@@ -26,9 +26,10 @@ export class ContactUsController {
   @Public()
   @Get()
   async getAllContactUs(@Query() query: GetContactUsDto) {
-    const { total, data } = await this.contactUsService.getAllContactUs(query);
+    const { total, data, newest } =
+      await this.contactUsService.getAllContactUs(query);
 
-    return successResponsePayload('Get all contact us', data, total);
+    return successResponsePayload('Get all contact us', data, total, newest);
   }
 
   @Public()
