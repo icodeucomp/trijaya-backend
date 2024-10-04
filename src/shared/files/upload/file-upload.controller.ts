@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   ParseEnumPipe,
   Post,
@@ -35,6 +36,15 @@ export class FileUploadController {
     FileInterceptor('upload', {
       storage,
       limits: { fileSize: maxDocumentSize },
+      fileFilter: (req, file, callback) => {
+        if (file.mimetype !== 'application/pdf') {
+          return callback(
+            new BadRequestException('Input must be "pdf" format!'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
     }),
   )
   async uploadDocumentFile(
