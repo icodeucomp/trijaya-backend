@@ -30,7 +30,7 @@ export class ProductsController {
   async getAllProduct(@Query() query: GetProductDto) {
     const products = await this.productService.getAllProduct(query);
 
-    return successResponsePayload('Get all product', products);
+    return successResponsePayload('Get all product', products, products.length);
   }
 
   @Public()

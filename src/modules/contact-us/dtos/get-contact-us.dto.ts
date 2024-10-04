@@ -1,6 +1,7 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
 import { AdminSortBy, OrderBy } from '@common/enums';
+import { defaultLimitPageData, defaultPage } from '@common/utils';
 
 export class GetContactUsDto {
   @IsOptional()
@@ -41,9 +42,9 @@ export class GetContactUsDto {
 
   @IsOptional()
   @IsNumberString()
-  page?: string = '1';
+  page?: string = defaultPage;
 
   @IsOptional()
   @IsNumberString()
-  limit?: string = '10';
+  limit?: string = defaultLimitPageData;
 }

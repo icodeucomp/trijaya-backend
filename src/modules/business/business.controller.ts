@@ -42,7 +42,11 @@ export class BusinessController {
   ): Promise<ResponsePayload<Business[]>> {
     const business = await this.businessService.getAllBusiness(query);
 
-    return successResponsePayload('Get all business', business);
+    return successResponsePayload(
+      'Get all business',
+      business,
+      business.length,
+    );
   }
 
   @Public()

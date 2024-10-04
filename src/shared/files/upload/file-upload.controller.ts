@@ -17,7 +17,12 @@ import {
   MediaType,
 } from '@common/enums';
 import { JwtGuard } from '@common/guards';
-import { maxSize, maxUpload, storage } from '@common/utils';
+import {
+  maxDocumentSize,
+  maxImageSize,
+  maxUpload,
+  storage,
+} from '@common/utils';
 import { FileUploadService } from '@shared/files/upload/file-upload.service';
 
 @UseGuards(JwtGuard)
@@ -25,10 +30,27 @@ import { FileUploadService } from '@shared/files/upload/file-upload.service';
 export class FileUploadController {
   constructor(private fileUpload: FileUploadService) {}
 
+  @Post('upload/document')
+  @UseInterceptors(
+    FileInterceptor('upload', {
+      storage,
+      limits: { fileSize: maxDocumentSize },
+    }),
+  )
+  async uploadDocumentFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('category')
+    category: BusinessSlug | DocumentCategory,
+  ): Promise<{ url: string; size: string }> {
+    const url = this.fileUpload.uploadFile(file, MediaType.Document, category);
+
+    return url;
+  }
+
   // Upload Blog Media, Document & insert/update business header photo (single upload)
   @Post('upload')
   @UseInterceptors(
-    FileInterceptor('upload', { storage, limits: { fileSize: maxSize } }),
+    FileInterceptor('upload', { storage, limits: { fileSize: maxImageSize } }),
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
@@ -47,7 +69,7 @@ export class FileUploadController {
   @UseInterceptors(
     FilesInterceptor('uploads', maxUpload, {
       storage,
-      limits: { fileSize: maxSize },
+      limits: { fileSize: maxImageSize },
     }),
   )
   async uploadFiles(

@@ -102,8 +102,7 @@ export class DocumentsService {
     uploaderId: number,
     dto: CreateDocumentDto,
   ): Promise<Document> {
-    const name = await this.generateDocumentName(dto.name);
-    const slug = generateSlug(name);
+    const [name, slug] = await this.generateDocumentName(dto.name);
 
     const document = await this.prisma.document.create({
       data: {
@@ -130,8 +129,9 @@ export class DocumentsService {
     updatedData.uploaderId = uploaderId;
 
     if (dto.name) {
-      updatedData.name = await this.generateDocumentName(dto.name);
-      updatedData.slug = generateSlug(updatedData.name);
+      [updatedData.name, updatedData.slug] = await this.generateDocumentName(
+        dto.name,
+      );
     }
 
     const document = await this.prisma.document.update({
@@ -156,17 +156,20 @@ export class DocumentsService {
     return document;
   }
 
-  private async generateDocumentName(name: string): Promise<string> {
+  private async generateDocumentName(name: string): Promise<[string, string]> {
     let duplicateCount = 0;
     let documentName = name;
+    let documentSlug = generateSlug(name);
 
     while (
       await this.prisma.document.findFirst({ where: { name: documentName } })
     ) {
       duplicateCount++;
       documentName = `${name}(${duplicateCount})`;
+      console.log({ duplicateCount });
+      documentSlug = generateSlug(name) + `(${duplicateCount})`;
     }
 
-    return documentName;
+    return [documentName, documentSlug];
   }
 }

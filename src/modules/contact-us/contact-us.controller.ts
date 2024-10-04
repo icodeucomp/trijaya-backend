@@ -28,7 +28,11 @@ export class ContactUsController {
   async getAllContactUs(@Query() query: GetContactUsDto) {
     const contactUs = await this.contactUsService.getAllContactUs(query);
 
-    return successResponsePayload('Get all contact us', contactUs);
+    return successResponsePayload(
+      'Get all contact us',
+      contactUs,
+      contactUs.length,
+    );
   }
 
   @Public()

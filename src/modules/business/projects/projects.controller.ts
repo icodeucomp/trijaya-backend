@@ -30,7 +30,7 @@ export class ProjectsController {
   async getAllProject(@Query() query: GetProjectDto) {
     const projects = await this.projectService.getAllProject(query);
 
-    return successResponsePayload('Get all project', projects);
+    return successResponsePayload('Get all project', projects, projects.length);
   }
 
   @Public()

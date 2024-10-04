@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 
 import { ProductSortBy, OrderBy } from '@common/enums';
+import { defaultLimitPageData, defaultPage } from '@common/utils';
 
 export class GetServiceDto {
   @IsOptional()
@@ -35,9 +36,9 @@ export class GetServiceDto {
 
   @IsOptional()
   @IsNumberString()
-  page?: string = '1';
+  page?: string = defaultPage;
 
   @IsOptional()
   @IsNumberString()
-  limit?: string = '10';
+  limit?: string = defaultLimitPageData;
 }

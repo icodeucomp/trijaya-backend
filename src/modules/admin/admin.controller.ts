@@ -32,7 +32,7 @@ export class AdminController {
   ): Promise<ResponsePayload<Admin[]>> {
     const admins = await this.adminService.getAllAdmin(query);
 
-    return successResponsePayload('Get all admin', admins);
+    return successResponsePayload('Get all admin', admins, admins.length);
   }
 
   // For showing uploader name list in document

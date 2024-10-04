@@ -30,7 +30,7 @@ export class ServicesController {
   async getAllService(@Query() query: GetServiceDto) {
     const services = await this.serviceService.getAllService(query);
 
-    return successResponsePayload('Get all service', services);
+    return successResponsePayload('Get all service', services, services.length);
   }
 
   @Public()

@@ -1,6 +1,7 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
 import { BlogSortBy, OrderBy } from '@common/enums';
+import { defaultLimitPageData, defaultPage } from '@common/utils';
 
 export class GetBlogDto {
   @IsOptional()
@@ -29,9 +30,9 @@ export class GetBlogDto {
 
   @IsOptional()
   @IsNumberString()
-  page?: string = '1';
+  page?: string = defaultPage;
 
   @IsOptional()
   @IsNumberString()
-  limit?: string = '10';
+  limit?: string = defaultLimitPageData;
 }

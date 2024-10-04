@@ -30,7 +30,7 @@ export class BlogsController {
   ): Promise<ResponsePayload<Blog[]>> {
     const blogs = await this.blogservice.getAllBlog(query);
 
-    return successResponsePayload('Get all blog', blogs);
+    return successResponsePayload('Get all blog', blogs, blogs.length);
   }
 
   @Public()

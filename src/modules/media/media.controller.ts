@@ -30,7 +30,7 @@ export class MediaController {
   async getAllMedia(@Query() query: GetMediaDto) {
     const medias = await this.mediaService.getAllMedia(query);
 
-    return successResponsePayload('Get all media', medias);
+    return successResponsePayload('Get all media', medias, medias.length);
   }
 
   @Public()

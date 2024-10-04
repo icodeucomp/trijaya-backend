@@ -1,6 +1,7 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
 import { DocumentSortBy, OrderBy } from '@common/enums';
+import { defaultLimitPageData, defaultPage } from '@common/utils';
 
 export class GetDocumentDto {
   @IsOptional()
@@ -33,9 +34,9 @@ export class GetDocumentDto {
 
   @IsOptional()
   @IsNumberString()
-  page?: string = '1';
+  page?: string = defaultPage;
 
   @IsOptional()
   @IsNumberString()
-  limit?: string = '10';
+  limit?: string = defaultLimitPageData;
 }

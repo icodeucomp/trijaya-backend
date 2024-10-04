@@ -41,7 +41,7 @@ export class FileUploadService {
       !this.isValidDocumentCategory(category)
     ) {
       throw new BadRequestException(
-        `Upload failed, no document with category ${category}`,
+        '`Upload failed, no document with category ${category}`',
       );
     }
 

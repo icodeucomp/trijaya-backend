@@ -44,7 +44,11 @@ export class DocumentsController {
   ): Promise<ResponsePayload<Document[]>> {
     const documents = await this.documentService.getAllDocument(query);
 
-    return successResponsePayload('Get all document', documents);
+    return successResponsePayload(
+      'Get all document',
+      documents,
+      documents.length,
+    );
   }
 
   @Public()

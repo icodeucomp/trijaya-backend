@@ -7,13 +7,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Blog, Prisma } from '@prisma/client';
 
+import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
 import {
   generateDateRange,
   generatePagination,
   generateSlug,
 } from '@common/utils';
-import { PrismaService } from '@shared/prisma/prisma.service';
 
 @Injectable()
 export class BlogsService {
@@ -110,22 +110,34 @@ export class BlogsService {
 
     const updatedData: UpdateBlogDto = { ...dto };
 
-    if (dto.title) {
-      updatedData.slug = generateSlug(updatedData.title);
+    try {
+      console.log({ dto });
+      if (dto.title) {
+        updatedData.slug = generateSlug(updatedData.title);
+      }
+
+      if (dto.content) {
+        updatedData.imageHeader = this.extractImageHeaderFromContent(
+          dto.content,
+        );
+      }
+
+      const blog = await this.prisma.blog.update({
+        where: {
+          id: existingBlog.id,
+        },
+        data: updatedData,
+      });
+
+      return blog;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated blog title');
+        }
+      }
+      throw new InternalServerErrorException(error.message);
     }
-
-    if (dto.content) {
-      updatedData.imageHeader = this.extractImageHeaderFromContent(dto.content);
-    }
-
-    const blog = await this.prisma.blog.update({
-      where: {
-        id: existingBlog.id,
-      },
-      data: updatedData,
-    });
-
-    return blog;
   }
 
   async deleteBlogBySlug(blogSlug: string): Promise<Blog> {
