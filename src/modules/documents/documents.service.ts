@@ -139,7 +139,7 @@ export class DocumentsService {
     const updatedData: UpdateDocumentDto = { ...dto };
     updatedData.uploaderId = uploaderId;
 
-    if (dto.name) {
+    if (dto.name != existingDocument.name) {
       [updatedData.name, updatedData.slug] = await this.generateDocumentName(
         dto.name,
       );
