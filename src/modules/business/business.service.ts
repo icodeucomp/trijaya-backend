@@ -1,9 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Business } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Business, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
-import { BusinessMetadata, GetData } from '@common/interfaces';
+import {
+  BusinessImageHeader,
+  BusinessMetadata,
+  GetData,
+  ProductImageHeader,
+} from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -153,17 +162,34 @@ export class BusinessService {
   async createBusiness(dto: CreateBusinessDto): Promise<Business> {
     const slug = generateSlug(dto.title);
 
-    const business = await this.prisma.business.create({
-      data: {
-        title: dto.title,
-        slug,
-        description: dto.description,
-        imageHeaderUrl: dto.imageHeaderUrl,
-        productHeaderUrl: dto.productHeaderUrl,
-      },
-    });
+    try {
+      if (dto.imageHeader || dto.productHeader) {
+        [dto.imageHeader, dto.productHeader] = await this.validateHeaderImages(
+          null,
+          dto.imageHeader,
+          dto.productHeader,
+        );
+      }
 
-    return business;
+      const business = await this.prisma.business.create({
+        data: {
+          title: dto.title,
+          slug,
+          description: dto.description,
+          imageHeader: dto.imageHeader as unknown as Prisma.InputJsonValue,
+          productHeader: dto.productHeader as unknown as Prisma.InputJsonValue,
+        },
+      });
+
+      return business;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated business title');
+        }
+      }
+      throw error;
+    }
   }
 
   async updateBusinessBySlug(
@@ -174,18 +200,39 @@ export class BusinessService {
 
     const updatedData: UpdateBusinessDto = { ...dto };
 
-    if (dto.title) {
-      updatedData.slug = generateSlug(updatedData.title);
+    try {
+      if (dto.title) {
+        updatedData.slug = generateSlug(updatedData.title);
+      }
+
+      [dto.imageHeader, dto.productHeader] = await this.validateHeaderImages(
+        existingBusiness.id,
+        dto.imageHeader,
+        dto.productHeader,
+      );
+
+      const business = await this.prisma.business.update({
+        where: {
+          id: existingBusiness.id,
+        },
+        data: {
+          ...updatedData,
+          imageHeader:
+            updatedData.imageHeader as unknown as Prisma.InputJsonValue,
+          productHeader:
+            updatedData.productHeader as unknown as Prisma.InputJsonValue,
+        },
+      });
+
+      return business;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated business title');
+        }
+      }
+      throw error;
     }
-
-    const business = await this.prisma.business.update({
-      where: {
-        id: existingBusiness.id,
-      },
-      data: updatedData,
-    });
-
-    return business;
   }
 
   async deleteBusinessBySlug(businessslug: string): Promise<Business> {
@@ -198,5 +245,59 @@ export class BusinessService {
     });
 
     return business;
+  }
+
+  private async validateHeaderImages(
+    businessId: number | null,
+    businessHeader: BusinessImageHeader | null,
+    productHeader: ProductImageHeader | null,
+  ): Promise<{ slug: string; url: string }[]> | null {
+    const headers: { slug: string; url: string }[] = [];
+
+    if (businessHeader) {
+      const duplicatedImageHeader = await this.prisma.business.findFirst({
+        where: {
+          imageHeader: {
+            path: ['slug'],
+            string_contains: businessHeader.slug.toLowerCase(),
+          },
+          NOT: {
+            ...(businessId ? { NOT: { id: businessId } } : {}),
+          },
+        },
+      });
+
+      if (duplicatedImageHeader) {
+        throw new BadRequestException('Duplicated business image header');
+      }
+    }
+
+    if (productHeader) {
+      const duplicatedProductHeader = await this.prisma.business.findFirst({
+        where: {
+          productHeader: {
+            path: ['slug'],
+            string_contains: productHeader.slug.toLowerCase(),
+          },
+          ...(businessId ? { NOT: { id: businessId } } : {}),
+        },
+      });
+
+      if (duplicatedProductHeader) {
+        throw new BadRequestException('Duplicated business product header');
+      }
+
+      headers[0] = {
+        slug: businessHeader.slug.toLowerCase(),
+        url: businessHeader.url,
+      };
+
+      headers[1] = {
+        slug: productHeader.slug.toLowerCase(),
+        url: productHeader.url,
+      };
+
+      return headers;
+    }
   }
 }

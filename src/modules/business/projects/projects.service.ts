@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Project } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, Project } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
-import { GetData } from '@common/interfaces';
+import { GetData, MediaData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -97,17 +101,30 @@ export class ProjectsService {
   async createProject(dto: CreateProjectDto): Promise<Project> {
     const slug = generateSlug(dto.title);
 
-    const project = await this.prisma.project.create({
-      data: {
-        title: dto.title,
-        slug,
-        description: dto.description,
-        mediaUrls: dto.mediaUrls,
-        businessId: dto.businessId,
-      },
-    });
+    try {
+      if (dto.media) {
+        dto.media = await this.validateProjectMedia(null, dto.media);
+      }
 
-    return project;
+      const project = await this.prisma.project.create({
+        data: {
+          title: dto.title,
+          slug,
+          description: dto.description,
+          media: dto.media as unknown as Prisma.InputJsonValue[],
+          businessId: dto.businessId,
+        },
+      });
+
+      return project;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated project title');
+        }
+      }
+      throw error;
+    }
   }
 
   async updateProjectBySlug(projectslug: string, dto: UpdateProjectDto) {
@@ -115,18 +132,37 @@ export class ProjectsService {
 
     const updatedData: UpdateProjectDto = { ...dto };
 
-    if (dto.title) {
-      updatedData.slug = generateSlug(updatedData.title);
+    try {
+      if (dto.title) {
+        updatedData.slug = generateSlug(updatedData.title);
+      }
+
+      if (dto.media) {
+        dto.media = await this.validateProjectMedia(
+          existingProject.id,
+          dto.media,
+        );
+      }
+
+      const project = await this.prisma.project.update({
+        where: {
+          id: existingProject.id,
+        },
+        data: {
+          ...updatedData,
+          media: updatedData.media as unknown as Prisma.InputJsonValue[],
+        },
+      });
+
+      return project;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated project title');
+        }
+      }
+      throw error;
     }
-
-    const project = await this.prisma.project.update({
-      where: {
-        id: existingProject.id,
-      },
-      data: updatedData,
-    });
-
-    return project;
   }
 
   async deleteProjectBySlug(projectslug: string): Promise<Project> {
@@ -139,5 +175,49 @@ export class ProjectsService {
     });
 
     return project;
+  }
+
+  async validateProjectMedia(
+    projectId: number | null,
+    media: MediaData[] | null,
+  ): Promise<{ slug: string; url: string }[]> | null {
+    if (!media || media.length === 0) {
+      return null;
+    }
+
+    const mediaList: { slug: string; url: string }[] = media.map((item) => ({
+      slug: item.slug.toLowerCase(),
+      url: item.url,
+    }));
+
+    const uniqueSlugs = new Set(mediaList.map((item) => item.slug));
+    if (uniqueSlugs.size !== mediaList.length) {
+      throw new BadRequestException(
+        'Duplicate slugs found in input media array',
+      );
+    }
+
+    const allProducts = await this.prisma.project.findMany({
+      where: projectId ? { NOT: { id: projectId } } : {},
+      select: {
+        id: true,
+        media: true,
+      },
+    });
+
+    for (const newMedia of mediaList) {
+      const conflictingProduct = allProducts.find((project) => {
+        const projectMedia = project.media as { slug: string; url: string }[];
+        return projectMedia.some(
+          (existingMedia) => existingMedia.slug.toLowerCase() === newMedia.slug,
+        );
+      });
+
+      if (conflictingProduct) {
+        throw new BadRequestException(`Duplicated project media`);
+      }
+    }
+
+    return mediaList;
   }
 }

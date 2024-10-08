@@ -1,10 +1,21 @@
+import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
+
+export class ProjectMediaDto {
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+}
 
 export class CreateProjectDto {
   @IsString()
@@ -19,7 +30,8 @@ export class CreateProjectDto {
   @IsNotEmpty()
   businessId: number;
 
-  @IsArray()
+  @ValidateNested()
+  @Type(() => ProjectMediaDto)
   @IsOptional()
-  mediaUrls: string[];
+  media?: ProjectMediaDto[];
 }

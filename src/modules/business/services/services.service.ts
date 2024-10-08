@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Service } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, Service } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
-import { GetData } from '@common/interfaces';
+import { GetData, MediaData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -97,17 +101,30 @@ export class ServicesService {
   async createService(dto: CreateServiceDto): Promise<Service> {
     const slug = generateSlug(dto.title);
 
-    const service = await this.prisma.service.create({
-      data: {
-        title: dto.title,
-        slug,
-        description: dto.description,
-        mediaUrls: dto.mediaUrls,
-        businessId: dto.businessId,
-      },
-    });
+    try {
+      if (dto.media) {
+        dto.media = await this.validateServiceMedia(null, dto.media);
+      }
 
-    return service;
+      const service = await this.prisma.service.create({
+        data: {
+          title: dto.title,
+          slug,
+          description: dto.description,
+          media: dto.media as unknown as Prisma.InputJsonValue[],
+          businessId: dto.businessId,
+        },
+      });
+
+      return service;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated service title');
+        }
+      }
+      throw error;
+    }
   }
 
   async updateServiceBySlug(serviceslug: string, dto: UpdateServiceDto) {
@@ -115,18 +132,37 @@ export class ServicesService {
 
     const updatedData: UpdateServiceDto = { ...dto };
 
-    if (dto.title) {
-      updatedData.slug = generateSlug(updatedData.title);
+    try {
+      if (dto.title) {
+        updatedData.slug = generateSlug(updatedData.title);
+      }
+
+      if (dto.media) {
+        dto.media = await this.validateServiceMedia(
+          existingService.id,
+          dto.media,
+        );
+      }
+
+      const service = await this.prisma.service.update({
+        where: {
+          id: existingService.id,
+        },
+        data: {
+          ...updatedData,
+          media: updatedData.media as unknown as Prisma.InputJsonValue[],
+        },
+      });
+
+      return service;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated service title');
+        }
+      }
+      throw error;
     }
-
-    const service = await this.prisma.service.update({
-      where: {
-        id: existingService.id,
-      },
-      data: updatedData,
-    });
-
-    return service;
   }
 
   async deleteServiceBySlug(serviceslug: string): Promise<Service> {
@@ -139,5 +175,49 @@ export class ServicesService {
     });
 
     return service;
+  }
+
+  async validateServiceMedia(
+    serviceId: number | null,
+    media: MediaData[] | null,
+  ): Promise<{ slug: string; url: string }[]> | null {
+    if (!media || media.length === 0) {
+      return null;
+    }
+
+    const mediaList: { slug: string; url: string }[] = media.map((item) => ({
+      slug: item.slug.toLowerCase(),
+      url: item.url,
+    }));
+
+    const uniqueSlugs = new Set(mediaList.map((item) => item.slug));
+    if (uniqueSlugs.size !== mediaList.length) {
+      throw new BadRequestException(
+        'Duplicate slugs found in input media array',
+      );
+    }
+
+    const allProducts = await this.prisma.service.findMany({
+      where: serviceId ? { NOT: { id: serviceId } } : {},
+      select: {
+        id: true,
+        media: true,
+      },
+    });
+
+    for (const newMedia of mediaList) {
+      const conflictingProduct = allProducts.find((service) => {
+        const serviceMedia = service.media as { slug: string; url: string }[];
+        return serviceMedia.some(
+          (existingMedia) => existingMedia.slug.toLowerCase() === newMedia.slug,
+        );
+      });
+
+      if (conflictingProduct) {
+        throw new BadRequestException(`Duplicated service media`);
+      }
+    }
+
+    return mediaList;
   }
 }

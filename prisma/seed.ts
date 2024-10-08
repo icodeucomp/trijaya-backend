@@ -15,64 +15,92 @@ async function main() {
       title: 'Civil',
       slug: BusinessSlug.Civil,
       description: "This is description for business 'civil'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'civil-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'civil-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
     {
       title: 'Construction',
       slug: BusinessSlug.Construction,
       description: "This is description for business 'construction'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'construction-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'construction-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
     {
       title: 'Electrical',
       slug: BusinessSlug.Electrical,
       description: "This is description for business 'electrical'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'electrical-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'electrical-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
     {
       title: 'Fabrication',
       slug: BusinessSlug.Fabrication,
       description: "This is description for business 'fabrication'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'fabrication-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'fabrication-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
     {
       title: 'General Supplier',
       slug: BusinessSlug.General_supplier,
       description: "This is description for business 'general supplier'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'general-supplier-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'general-supplier-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
     {
       title: 'Machining',
       slug: BusinessSlug.Machining,
       description: "This is description for business 'machining'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'machining-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'machining-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
     {
       title: 'Mechanical',
       slug: BusinessSlug.Mechanical,
       description: "This is description for business 'mechanical'",
-      imageHeaderUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      productHeadersUrl:
-        'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      imageHeader: {
+        slug: 'mechanical-business-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
+      productHeader: {
+        slug: 'mechanical-business-product-header',
+        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+      },
     },
   ];
 
@@ -135,8 +163,8 @@ async function main() {
         title: businessData[i - 1].title,
         slug: businessData[i - 1].slug,
         description: businessData[i - 1].description,
-        imageHeaderUrl: businessData[i - 1].imageHeaderUrl,
-        productHeaderUrl: businessData[i - 1].imageHeaderUrl,
+        imageHeader: businessData[i - 1].imageHeader,
+        productHeader: businessData[i - 1].productHeader,
       },
     });
 
@@ -149,10 +177,19 @@ async function main() {
           title: `${businessData[i - 1].title} Product ${j}`,
           slug: `${businessData[i - 1].slug}-product-${j}`,
           description: `${businessData[i - 1].title} product ${j}`,
-          mediaUrls: [
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+          media: [
+            {
+              slug: `${businessData[i - 1].slug}-product-image${i}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
+            {
+              slug: `${businessData[i - 1].slug}-product-image${i + 1}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
+            {
+              slug: `${businessData[i - 1].slug}-product-image${i + 1}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
           ],
           businessId: i,
         },
@@ -166,10 +203,19 @@ async function main() {
           title: `${businessData[i - 1].title} Project ${j}`,
           slug: `${businessData[i - 1].slug}-project-${j}`,
           description: `${businessData[i - 1].title} project ${j}`,
-          mediaUrls: [
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+          media: [
+            {
+              slug: `${businessData[i - 1].slug}-project-image${i}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
+            {
+              slug: `${businessData[i - 1].slug}-project-image${i + 1}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
+            {
+              slug: `${businessData[i - 1].slug}-project-image${i + 1}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
           ],
           businessId: i,
         },
@@ -183,10 +229,19 @@ async function main() {
           title: `${businessData[i - 1].title} Service ${j}`,
           slug: `${businessData[i - 1].slug}-service-${j}`,
           description: `${businessData[i - 1].title} service ${j}`,
-          mediaUrls: [
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
-            `https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png`,
+          media: [
+            {
+              slug: `${businessData[i - 1].slug}-service-image${i}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
+            {
+              slug: `${businessData[i - 1].slug}-service-image${i + 1}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
+            {
+              slug: `${businessData[i - 1].slug}-service-image${i + 1}`,
+              url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+            },
           ],
           businessId: i,
         },

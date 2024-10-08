@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Document } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Document, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { DocumentCategory, OrderBy } from '@common/enums';
@@ -126,18 +131,27 @@ export class DocumentsService {
   ): Promise<Document> {
     const [name, slug] = await this.generateDocumentName(dto.name);
 
-    const document = await this.prisma.document.create({
-      data: {
-        name,
-        slug,
-        category: dto.category,
-        url: dto.url,
-        size: dto.size,
-        uploaderId,
-      },
-    });
+    try {
+      const document = await this.prisma.document.create({
+        data: {
+          name,
+          slug,
+          category: dto.category,
+          url: dto.url,
+          size: dto.size,
+          uploaderId,
+        },
+      });
 
-    return document;
+      return document;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated document name');
+        }
+      }
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async updateDocumentBySlug(
@@ -150,20 +164,27 @@ export class DocumentsService {
     const updatedData: UpdateDocumentDto = { ...dto };
     updatedData.uploaderId = uploaderId;
 
-    if (dto.name != existingDocument.name) {
-      [updatedData.name, updatedData.slug] = await this.generateDocumentName(
-        dto.name,
-      );
+    try {
+      if (dto.name) {
+        updatedData.slug = this.generateDocumentSlug(dto.name);
+      }
+
+      const document = await this.prisma.document.update({
+        where: {
+          id: existingDocument.id,
+        },
+        data: updatedData,
+      });
+
+      return document;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated document name');
+        }
+      }
+      throw error;
     }
-
-    const document = await this.prisma.document.update({
-      where: {
-        id: existingDocument.id,
-      },
-      data: updatedData,
-    });
-
-    return document;
   }
 
   async deleteDocumentBySlug(documentSlug: string): Promise<Document> {
@@ -193,5 +214,14 @@ export class DocumentsService {
     }
 
     return [documentName, documentSlug];
+  }
+
+  private generateDocumentSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s\(\)-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+$/g, '');
   }
 }

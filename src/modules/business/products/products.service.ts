@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Product } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, Product } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
-import { GetData } from '@common/interfaces';
+import { GetData, MediaData } from '@common/interfaces';
 import {
   generateDateRange,
   generatePagination,
@@ -96,18 +100,30 @@ export class ProductsService {
 
   async createProduct(dto: CreateProductDto): Promise<Product> {
     const slug = generateSlug(dto.title);
+    try {
+      if (dto.media) {
+        dto.media = await this.validateProductMedia(null, dto.media);
+      }
 
-    const product = await this.prisma.product.create({
-      data: {
-        title: dto.title,
-        slug,
-        description: dto.description,
-        mediaUrls: dto.mediaUrls,
-        businessId: dto.businessId,
-      },
-    });
+      const product = await this.prisma.product.create({
+        data: {
+          title: dto.title,
+          slug,
+          description: dto.description,
+          media: dto.media as unknown as Prisma.InputJsonValue[],
+          businessId: dto.businessId,
+        },
+      });
 
-    return product;
+      return product;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated product title');
+        }
+      }
+      throw error;
+    }
   }
 
   async updateProductBySlug(productslug: string, dto: UpdateProductDto) {
@@ -115,18 +131,37 @@ export class ProductsService {
 
     const updatedData: UpdateProductDto = { ...dto };
 
-    if (dto.title) {
-      updatedData.slug = generateSlug(updatedData.title);
+    try {
+      if (dto.title) {
+        updatedData.slug = generateSlug(updatedData.title);
+      }
+
+      if (dto.media) {
+        dto.media = await this.validateProductMedia(
+          existingProduct.id,
+          dto.media,
+        );
+      }
+
+      const product = await this.prisma.product.update({
+        where: {
+          id: existingProduct.id,
+        },
+        data: {
+          ...updatedData,
+          media: updatedData.media as unknown as Prisma.InputJsonValue[],
+        },
+      });
+
+      return product;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated product title');
+        }
+      }
+      throw error;
     }
-
-    const product = await this.prisma.product.update({
-      where: {
-        id: existingProduct.id,
-      },
-      data: updatedData,
-    });
-
-    return product;
   }
 
   async deleteProductBySlug(productslug: string): Promise<Product> {
@@ -139,6 +174,50 @@ export class ProductsService {
     });
 
     return product;
+  }
+
+  async validateProductMedia(
+    productId: number | null,
+    media: MediaData[] | null,
+  ): Promise<{ slug: string; url: string }[]> | null {
+    if (!media || media.length === 0) {
+      return null;
+    }
+
+    const mediaList: { slug: string; url: string }[] = media.map((item) => ({
+      slug: item.slug.toLowerCase(),
+      url: item.url,
+    }));
+
+    const uniqueSlugs = new Set(mediaList.map((item) => item.slug));
+    if (uniqueSlugs.size !== mediaList.length) {
+      throw new BadRequestException(
+        'Duplicate slugs found in input media array',
+      );
+    }
+
+    const allProducts = await this.prisma.product.findMany({
+      where: productId ? { NOT: { id: productId } } : {},
+      select: {
+        id: true,
+        media: true,
+      },
+    });
+
+    for (const newMedia of mediaList) {
+      const conflictingProduct = allProducts.find((product) => {
+        const productMedia = product.media as { slug: string; url: string }[];
+        return productMedia.some(
+          (existingMedia) => existingMedia.slug.toLowerCase() === newMedia.slug,
+        );
+      });
+
+      if (conflictingProduct) {
+        throw new BadRequestException(`Duplicated product media`);
+      }
+    }
+
+    return mediaList;
   }
 }
 

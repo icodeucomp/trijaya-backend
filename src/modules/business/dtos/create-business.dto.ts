@@ -1,4 +1,30 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+
+export class BusinessImageHeaderDto {
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+}
+
+export class ProductImageHeaderDto {
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+}
 
 export class CreateBusinessDto {
   @IsString()
@@ -9,11 +35,13 @@ export class CreateBusinessDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
+  @ValidateNested()
+  @Type(() => BusinessImageHeaderDto)
   @IsOptional()
-  imageHeaderUrl: string;
+  imageHeader?: BusinessImageHeaderDto;
 
-  @IsString()
+  @ValidateNested()
+  @Type(() => ProductImageHeaderDto)
   @IsOptional()
-  productHeaderUrl: string;
+  productHeader?: ProductImageHeaderDto;
 }

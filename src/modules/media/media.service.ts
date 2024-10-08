@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Media, Prisma } from '@prisma/client';
@@ -109,11 +108,10 @@ export class MediaService {
   ): Promise<Prisma.BatchPayload | Media> {
     try {
       if (!Array.isArray(dtos)) {
-        const name = await this.generateMediaName(dtos.name);
-        const slug = generateSlug(name);
+        const slug = generateSlug(dtos.name);
         const media = await this.prisma.media.create({
           data: {
-            name,
+            name: dtos.name,
             slug,
             url: dtos.url,
             size: dtos.size,
@@ -126,10 +124,9 @@ export class MediaService {
 
       const mediaData = await Promise.all(
         dtos.map(async (dto) => {
-          const name = await this.generateMediaName(dto.name);
-          const slug = generateSlug(name);
+          const slug = generateSlug(dto.name);
           return {
-            name,
+            name: dto.name,
             slug,
             url: dto.url,
             size: dto.size,
@@ -145,14 +142,18 @@ export class MediaService {
         });
       });
 
+      if (media.count === 0) {
+        throw new BadRequestException('Duplicated media name');
+      }
+
       return media;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new BadRequestException('Duplicated blog title');
+          throw new BadRequestException('Duplicated media title');
         }
       }
-      throw new InternalServerErrorException(error.message);
+      throw error;
     }
   }
 
@@ -161,24 +162,33 @@ export class MediaService {
     uploaderId: number,
     dto: UpdateMediaDto,
   ) {
-    const existingMedia = await this.getMediaBySlug(mediaSlug);
+    try {
+      const existingMedia = await this.getMediaBySlug(mediaSlug);
 
-    const updatedData: UpdateMediaDto = { ...dto };
-    updatedData.uploaderId = uploaderId;
+      const updatedData: UpdateMediaDto = { ...dto };
+      updatedData.uploaderId = uploaderId;
 
-    if (dto.name) {
-      updatedData.name = await this.generateMediaName(dto.name);
-      updatedData.slug = generateSlug(updatedData.name);
+      if (dto.name) {
+        updatedData.name = await this.generateMediaName(dto.name);
+        updatedData.slug = generateSlug(updatedData.name);
+      }
+
+      const media = await this.prisma.media.update({
+        where: {
+          id: existingMedia.id,
+        },
+        data: updatedData,
+      });
+
+      return media;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Duplicated media title');
+        }
+      }
+      throw error;
     }
-
-    const media = await this.prisma.media.update({
-      where: {
-        id: existingMedia.id,
-      },
-      data: updatedData,
-    });
-
-    return media;
   }
 
   async deleteMediaBySlug(mediaSlug: string): Promise<Media> {

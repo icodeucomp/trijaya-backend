@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -115,7 +114,7 @@ export class BlogsService {
           throw new BadRequestException('Duplicated blog title');
         }
       }
-      throw new InternalServerErrorException(error.message);
+      throw error;
     }
   }
 
@@ -125,7 +124,6 @@ export class BlogsService {
     const updatedData: UpdateBlogDto = { ...dto };
 
     try {
-      console.log({ dto });
       if (dto.title) {
         updatedData.slug = generateSlug(updatedData.title);
       }
@@ -150,7 +148,7 @@ export class BlogsService {
           throw new BadRequestException('Duplicated blog title');
         }
       }
-      throw new InternalServerErrorException(error.message);
+      throw error;
     }
   }
 

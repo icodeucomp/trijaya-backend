@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -30,8 +30,8 @@ model Blog {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title       String  @unique
-  slug        String
+  title       String
+  slug        String  @unique
   content     String
   imageHeader String?
 
@@ -45,8 +45,8 @@ model Document {
   id         Int      @id @default(autoincrement())
   uploadedAt DateTime @default(now()) @updatedAt
 
-  name     String // unique handled in logic
-  slug     String
+  name     String
+  slug     String @unique
   category String
   url      String
   size     String
@@ -61,8 +61,8 @@ model Media {
   id         Int      @id @default(autoincrement())
   uploadedAt DateTime @default(now()) @updatedAt
 
-  name String @unique
-  slug String
+  name String
+  slug String @unique
   url  String
   size String
 
@@ -76,11 +76,11 @@ model Business {
   id        Int      @id @default(autoincrement())
   updatedAt DateTime @default(now()) @updatedAt
 
-  title            String  @unique
-  slug             String
-  description      String
-  imageHeaderUrl   String?
-  productHeaderUrl String?
+  title         String
+  slug          String @unique
+  description   String
+  imageHeader   Json?
+  productHeader Json?
 
   Product Product[]
   Project Project[]
@@ -93,10 +93,10 @@ model Product {
   id        Int      @id @default(autoincrement())
   updatedAt DateTime @default(now()) @updatedAt
 
-  title       String   @unique
-  slug        String
+  title       String
+  slug        String @unique
   description String
-  mediaUrls   String[]
+  media       Json[]
 
   businessId Int
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -108,10 +108,10 @@ model Project {
   id        Int      @id @default(autoincrement())
   updatedAt DateTime @default(now()) @updatedAt
 
-  title       String   @unique
-  slug        String
+  title       String
+  slug        String @unique
   description String
-  mediaUrls   String[]
+  media       Json[]
 
   businessId Int
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -123,10 +123,10 @@ model Service {
   id        Int      @id @default(autoincrement())
   updatedAt DateTime @default(now()) @updatedAt
 
-  title       String   @unique
-  slug        String
+  title       String
+  slug        String @unique
   description String
-  mediaUrls   String[]
+  media       Json[]
 
   businessId Int
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
