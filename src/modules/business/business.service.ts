@@ -163,21 +163,19 @@ export class BusinessService {
     const slug = generateSlug(dto.title);
 
     try {
-      if (dto.imageHeader || dto.productHeader) {
-        [dto.imageHeader, dto.productHeader] = await this.validateHeaderImages(
-          null,
-          dto.imageHeader,
-          dto.productHeader,
-        );
-      }
+      const [imageHeader, productHeader] = await this.validateHeaderImages(
+        null,
+        dto.imageHeader ?? null,
+        dto.productHeader ?? null,
+      );
 
       const business = await this.prisma.business.create({
         data: {
           title: dto.title,
           slug,
           description: dto.description,
-          imageHeader: dto.imageHeader as unknown as Prisma.InputJsonValue,
-          productHeader: dto.productHeader as unknown as Prisma.InputJsonValue,
+          imageHeader: imageHeader as unknown as Prisma.InputJsonValue,
+          productHeader: productHeader as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -205,10 +203,10 @@ export class BusinessService {
         updatedData.slug = generateSlug(updatedData.title);
       }
 
-      [dto.imageHeader, dto.productHeader] = await this.validateHeaderImages(
+      const [imageHeader, productHeader] = await this.validateHeaderImages(
         existingBusiness.id,
-        dto.imageHeader,
-        dto.productHeader,
+        dto.imageHeader ?? null,
+        dto.productHeader ?? null,
       );
 
       const business = await this.prisma.business.update({
@@ -217,10 +215,12 @@ export class BusinessService {
         },
         data: {
           ...updatedData,
-          imageHeader:
-            updatedData.imageHeader as unknown as Prisma.InputJsonValue,
-          productHeader:
-            updatedData.productHeader as unknown as Prisma.InputJsonValue,
+          imageHeader: imageHeader
+            ? (imageHeader as unknown as Prisma.InputJsonValue)
+            : existingBusiness.imageHeader,
+          productHeader: productHeader
+            ? (productHeader as unknown as Prisma.InputJsonValue)
+            : existingBusiness.productHeader,
         },
       });
 
@@ -251,8 +251,8 @@ export class BusinessService {
     businessId: number | null,
     businessHeader: BusinessImageHeader | null,
     productHeader: ProductImageHeader | null,
-  ): Promise<{ slug: string; url: string }[]> | null {
-    const headers: { slug: string; url: string }[] = [];
+  ): Promise<{ slug: string; url: string }[]> {
+    const headers: { slug: string; url: string }[] = [null, null];
 
     if (businessHeader) {
       const duplicatedImageHeader = await this.prisma.business.findFirst({
@@ -262,7 +262,7 @@ export class BusinessService {
             string_contains: businessHeader.slug.toLowerCase(),
           },
           NOT: {
-            ...(businessId ? { NOT: { id: businessId } } : {}),
+            ...(businessId ? { id: businessId } : {}),
           },
         },
       });
@@ -270,6 +270,11 @@ export class BusinessService {
       if (duplicatedImageHeader) {
         throw new BadRequestException('Duplicated business image header');
       }
+
+      headers[0] = {
+        slug: businessHeader.slug.toLowerCase(),
+        url: businessHeader.url,
+      };
     }
 
     if (productHeader) {
@@ -279,7 +284,9 @@ export class BusinessService {
             path: ['slug'],
             string_contains: productHeader.slug.toLowerCase(),
           },
-          ...(businessId ? { NOT: { id: businessId } } : {}),
+          NOT: {
+            ...(businessId ? { id: businessId } : {}),
+          },
         },
       });
 
@@ -287,17 +294,12 @@ export class BusinessService {
         throw new BadRequestException('Duplicated business product header');
       }
 
-      headers[0] = {
-        slug: businessHeader.slug.toLowerCase(),
-        url: businessHeader.url,
-      };
-
       headers[1] = {
         slug: productHeader.slug.toLowerCase(),
         url: productHeader.url,
       };
-
-      return headers;
     }
+
+    return headers;
   }
 }
