@@ -57,7 +57,7 @@ export class FileUploadController {
     return url;
   }
 
-  // Upload Blog Media, Document & insert/update business header photo (single upload)
+  // Upload Blog Media, Document, Business Headers, Album Header (single upload)
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('upload', { storage, limits: { fileSize: maxImageSize } }),
@@ -67,14 +67,14 @@ export class FileUploadController {
     @Query('type', new ParseEnumPipe(MediaType, { optional: true }))
     type: MediaType,
     @Query('category')
-    category: BusinessSlug | DocumentCategory,
+    category: BusinessSlug | DocumentCategory | string,
   ): Promise<{ url: string; size: string }> {
     const url = this.fileUpload.uploadFile(file, type, category);
 
     return url;
   }
 
-  // upload media for projects, products, service (multiple upload, max 10 per request)
+  // upload media for media, projects, products (multiple upload, max 10 per request)
   @Post('uploads')
   @UseInterceptors(
     FilesInterceptor('uploads', maxUpload, {
@@ -90,12 +90,14 @@ export class FileUploadController {
     businessSlug: BusinessSlug,
     @Query('business-type', new ParseEnumPipe(BusinessType, { optional: true }))
     businessType: BusinessType,
+    @Query('album') album: string,
   ): Promise<{ uploadedFiles: { name: string; url: string; size: string }[] }> {
     const urls = await this.fileUpload.uploadFiles(
       files,
       type,
       businessSlug,
       businessType,
+      album,
     );
 
     return urls;

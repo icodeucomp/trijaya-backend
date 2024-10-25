@@ -1,9 +1,17 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class S3Service extends S3Client {
+export class S3Service
+  extends S3Client
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(S3Service.name);
   private readonly bucket: string;
   private readonly region: string;
@@ -25,7 +33,7 @@ export class S3Service extends S3Client {
     try {
       this.logger.log('S3 client connected successfully.');
     } catch (error) {
-      this.logger.error('Failed to connect to S3:', error);
+      this.logger.error('Failed connecting to S3:', error);
     }
   }
 
@@ -33,7 +41,7 @@ export class S3Service extends S3Client {
     try {
       this.logger.log('S3 client disconnected successfully.');
     } catch (error) {
-      this.logger.error('Failed to disconnect from S3:', error);
+      this.logger.error('Failed disconnecting from S3:', error);
     }
   }
 

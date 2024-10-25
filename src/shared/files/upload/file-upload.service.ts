@@ -24,7 +24,7 @@ export class FileUploadService {
   async uploadFile(
     file: Express.Multer.File,
     type: MediaType,
-    category: BusinessSlug | DocumentCategory,
+    category: BusinessSlug | DocumentCategory | string,
   ): Promise<{ name: string; url: string; size: string }> {
     if (!file) {
       throw new BadRequestException('please input file');
@@ -50,7 +50,9 @@ export class FileUploadService {
         ? `${type}/${category}/header`
         : type === MediaType.Document
           ? `${type}/${category}`
-          : `${type}`;
+          : type === MediaType.Album
+            ? `${type}/${category}/header`
+            : `${type}`;
     const fileStream = fs.createReadStream(file.path);
     const contentType = file.mimetype || 'application/octet-stream';
     const fileSize = generateFileSize(file.size);
@@ -78,6 +80,7 @@ export class FileUploadService {
     type: MediaType,
     businessSlug: BusinessSlug,
     businessType: BusinessType,
+    album: string,
   ): Promise<{ uploadedFiles: { name: string; url: string; size: string }[] }> {
     const uploadedFiles = [];
 
@@ -87,7 +90,7 @@ export class FileUploadService {
 
     if (type !== MediaType.Business && type !== MediaType.Media) {
       throw new BadRequestException(
-        'Only media, product, project, and service can upload multiple',
+        'Only media, product, and project can upload multiple',
       );
     }
 
@@ -103,7 +106,7 @@ export class FileUploadService {
     const folderName =
       type === MediaType.Business
         ? `${type}/${businessSlug}/${businessType}`
-        : `${type}`;
+        : `album/${album}/${type}`;
 
     for (const file of files) {
       const fileStream = fs.createReadStream(file.path);

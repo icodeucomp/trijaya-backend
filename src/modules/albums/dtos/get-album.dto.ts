@@ -1,28 +1,36 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
-import { MediaSortBy, OrderBy } from '@common/enums';
+import { AlbumSortBy, OrderBy } from '@common/enums';
 import { defaultLimitPageData, defaultPage } from '@common/utils';
 
-export class GetMediaDto {
+export class GetAlbumDto {
   @IsOptional()
   @IsString()
   title?: string;
 
   @IsOptional()
   @IsString()
-  dateStart?: string;
+  dateCreateStart?: string;
 
   @IsOptional()
   @IsString()
-  dateEnd?: string;
+  dateCreateEnd?: string;
 
   @IsOptional()
   @IsString()
-  uploadedBy?: string;
+  dateUpdateStart?: string;
 
   @IsOptional()
-  @IsEnum(MediaSortBy)
-  sort?: MediaSortBy = MediaSortBy.Id;
+  @IsString()
+  dateUpdateEnd?: string;
+
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
+  @IsOptional()
+  @IsEnum(AlbumSortBy)
+  sort?: AlbumSortBy = AlbumSortBy.Id;
 
   @IsOptional()
   @IsEnum(OrderBy)

@@ -2,19 +2,19 @@ import { DocumentCategory } from '@common/enums';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateDocumentDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name: string;
 
-  @IsEnum(DocumentCategory)
   @IsNotEmpty()
+  @IsEnum(DocumentCategory)
   category: DocumentCategory;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   url: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   size: string;
 }

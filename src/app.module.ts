@@ -10,12 +10,13 @@ import { FileDownloadModule } from '@shared/files/download/file-download.module'
 import { QueuesModule } from '@shared/queues/queues.module';
 import { MailsModule } from '@shared/mails/mails.module';
 import { AdminModule } from '@modules/admin/admin.module';
+import { AlbumsModule } from '@modules/albums/albums.module';
 import { AuthenticationModule } from '@modules/authentication/authentication.module';
 import { BlogsModule } from '@modules/blogs/blogs.module';
 import { DocumentsModule } from '@modules/documents/documents.module';
 import { ContactUsModule } from '@modules/contact-us/contact-us.module';
 import { BusinessModule } from '@modules/business/business.module';
-import { MediaModule } from '@modules/media/media.module';
+import { MediaModule } from '@modules/albums/media/media.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { MediaModule } from '@modules/media/media.module';
     DocumentsModule,
     MediaModule,
     ContactUsModule,
+    AlbumsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

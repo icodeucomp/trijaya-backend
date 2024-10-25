@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import {
   BadRequestException,
   Injectable,
@@ -14,10 +15,10 @@ import {
   ProductImageHeader,
 } from '@common/interfaces';
 import {
-  generateDateRange,
   generatePagination,
   generateReadableDateTime,
   generateSlug,
+  validateAndGenerateDateRange,
 } from '@common/utils';
 import {
   CreateBusinessDto,
@@ -27,7 +28,10 @@ import {
 
 @Injectable()
 export class BusinessService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private config: ConfigService,
+    private prisma: PrismaService,
+  ) {}
 
   async getAllBusinessMetadata(): Promise<BusinessMetadata[]> {
     const business = await this.prisma.business.findMany({
@@ -45,8 +49,19 @@ export class BusinessService {
     const { title, dateStart, dateEnd, sort, order, page, limit } = query;
     const { skip, take } = generatePagination(page, limit);
 
-    const { start: dateStarted } = generateDateRange(dateStart);
-    const { end: dateEnded } = generateDateRange(dateEnd);
+    let dateStarted: Date;
+    let dateEnded: Date;
+
+    if (dateStart && dateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Updated',
+        dateStart,
+        dateEnd,
+      );
+
+      dateStarted = start;
+      dateEnded = end;
+    }
 
     const whereCondition: any = {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
@@ -73,15 +88,6 @@ export class BusinessService {
             },
           },
           Product: {
-            include: {
-              business: {
-                select: {
-                  title: true,
-                },
-              },
-            },
-          },
-          Service: {
             include: {
               business: {
                 select: {
@@ -140,15 +146,6 @@ export class BusinessService {
             },
           },
         },
-        Service: {
-          include: {
-            business: {
-              select: {
-                title: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -174,8 +171,12 @@ export class BusinessService {
           title: dto.title,
           slug,
           description: dto.description,
-          imageHeader: imageHeader as unknown as Prisma.InputJsonValue,
-          productHeader: productHeader as unknown as Prisma.InputJsonValue,
+          imageHeader:
+            (imageHeader as unknown as Prisma.InputJsonValue) ??
+            this.generateDefaultHeader(slug, 'image-header'),
+          productHeader:
+            (productHeader as unknown as Prisma.InputJsonValue) ??
+            this.generateDefaultHeader(slug, 'product-header'),
         },
       });
 
@@ -301,5 +302,15 @@ export class BusinessService {
     }
 
     return headers;
+  }
+
+  private generateDefaultHeader(
+    busingessSlug: string,
+    type: string,
+  ): { slug: string; url: string } {
+    return {
+      slug: `default-${type}-of-${busingessSlug}`,
+      url: this.config.get<string>('DEFAULT_IMAGE'),
+    };
   }
 }

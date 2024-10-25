@@ -1,6 +1,6 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
-import { DocumentSortBy, OrderBy } from '@common/enums';
+import { DocumentCategory, DocumentSortBy, OrderBy } from '@common/enums';
 import { defaultLimitPageData, defaultPage } from '@common/utils';
 
 export class GetDocumentDto {
@@ -9,8 +9,8 @@ export class GetDocumentDto {
   title?: string;
 
   @IsOptional()
-  @IsString()
-  category?: string;
+  @IsEnum(DocumentCategory)
+  category?: DocumentCategory;
 
   @IsOptional()
   @IsString()
@@ -21,7 +21,7 @@ export class GetDocumentDto {
   dateEnd?: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumberString()
   uploadedBy?: string;
 
   @IsOptional()

@@ -58,7 +58,7 @@ export class ContactUsController {
   }
 
   @Delete(':id')
-  async deleteContactUsBySlug(@Param('id') id: number) {
+  async deleteContactUsBySlug(@Param('id', ParseIntPipe) id: number) {
     const contactUs = await this.contactUsService.deleteContactUsById(id);
 
     return successResponsePayload(`Delete contact us by id ${id}`, contactUs);

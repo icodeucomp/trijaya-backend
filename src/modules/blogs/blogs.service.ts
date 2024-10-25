@@ -10,10 +10,10 @@ import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
-  generateDateRange,
   generatePagination,
   generateReadableDateTime,
   generateSlug,
+  validateAndGenerateDateRange,
 } from '@common/utils';
 import { CreateBlogDto, GetBlogDto, UpdateBlogDto } from '@modules/blogs/dtos';
 
@@ -25,21 +25,62 @@ export class BlogsService {
   ) {}
 
   async getAllBlog(query: GetBlogDto): Promise<GetData<Blog[]>> {
-    const { title, author, dateStart, dateEnd, sort, order, page, limit } =
-      query;
+    const {
+      title,
+      author,
+      dateCreateStart,
+      dateCreateEnd,
+      dateUpdateStart,
+      dateUpdateEnd,
+      sort,
+      order,
+      page,
+      limit,
+    } = query;
     const { skip, take } = generatePagination(page, limit);
 
-    const { start: dateStarted } = generateDateRange(dateStart);
-    const { end: dateEnded } = generateDateRange(dateEnd);
+    let dateCreatedStart: Date;
+    let dateCreatedEnd: Date;
+    let dateUpdatedStart: Date;
+    let dateUpdatedEnd: Date;
+
+    if (dateCreateStart && dateCreateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Created',
+        dateCreateStart,
+        dateCreateEnd,
+      );
+
+      dateCreatedStart = start;
+      dateCreatedEnd = end;
+    }
+
+    if (dateUpdateStart && dateUpdateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Updated',
+        dateUpdateStart,
+        dateUpdateEnd,
+      );
+
+      dateUpdatedStart = start;
+      dateUpdatedEnd = end;
+    }
 
     const whereCondition: any = {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
       ...(author && { authorId: Number(author) }),
-      ...(dateStart &&
-        dateEnd && {
-          uploadedAt: {
-            gte: dateStarted,
-            lt: dateEnded,
+      ...(dateCreateStart &&
+        dateCreateEnd && {
+          createdAt: {
+            gte: dateCreatedStart,
+            lt: dateCreatedEnd,
+          },
+        }),
+      ...(dateUpdateStart &&
+        dateUpdateEnd && {
+          updatedAt: {
+            gte: dateUpdatedStart,
+            lt: dateUpdatedEnd,
           },
         }),
     };
@@ -47,6 +88,9 @@ export class BlogsService {
     const [blogs, total, newest] = await this.prisma.$transaction([
       this.prisma.blog.findMany({
         where: whereCondition,
+        include: {
+          author: true,
+        },
         orderBy: { [sort]: order },
         skip,
         take,
@@ -65,9 +109,14 @@ export class BlogsService {
       }),
     ]);
 
+    const mappedBlogs = blogs.map((doc) => ({
+      ...doc,
+      author: doc.author.username,
+    }));
+
     return {
       total,
-      data: blogs,
+      data: mappedBlogs,
       newest: generateReadableDateTime(newest?.updatedAt),
     };
   }
@@ -78,11 +127,7 @@ export class BlogsService {
         slug: blogSlug,
       },
       include: {
-        author: {
-          select: {
-            username: true,
-          },
-        },
+        author: true,
       },
     });
 
@@ -90,7 +135,12 @@ export class BlogsService {
       throw new NotFoundException('Blog not found');
     }
 
-    return blog;
+    const mappedblog = {
+      ...blog,
+      author: blog.author.username,
+    };
+
+    return mappedblog;
   }
 
   async createBlog(authorId: number, dto: CreateBlogDto): Promise<Blog> {

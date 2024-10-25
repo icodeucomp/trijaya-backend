@@ -10,14 +10,22 @@ export class GetBlogDto {
 
   @IsOptional()
   @IsString()
-  dateStart?: string;
+  dateCreateStart?: string;
 
   @IsOptional()
   @IsString()
-  dateEnd?: string;
+  dateCreateEnd?: string;
 
   @IsOptional()
   @IsString()
+  dateUpdateStart?: string;
+
+  @IsOptional()
+  @IsString()
+  dateUpdateEnd?: string;
+
+  @IsOptional()
+  @IsNumberString()
   author?: string;
 
   @IsOptional()

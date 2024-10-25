@@ -1,10 +1,4 @@
-import {
-  IsOptional,
-  IsEnum,
-  IsString,
-  IsNumberString,
-  IsNumber,
-} from 'class-validator';
+import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
 import { ProductSortBy, OrderBy } from '@common/enums';
 import { defaultLimitPageData, defaultPage } from '@common/utils';
@@ -15,8 +9,8 @@ export class GetProjectDto {
   title?: string;
 
   @IsOptional()
-  @IsNumber()
-  businessId?: number;
+  @IsNumberString()
+  business?: string;
 
   @IsOptional()
   @IsString()

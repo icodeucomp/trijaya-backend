@@ -11,10 +11,10 @@ import { DocumentCategory, OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   capitalizedWord,
-  generateDateRange,
   generatePagination,
   generateReadableDateTime,
   generateSlug,
+  validateAndGenerateDateRange,
 } from '@common/utils';
 import {
   CreateDocumentDto,
@@ -51,8 +51,19 @@ export class DocumentsService {
     } = query;
     const { skip, take } = generatePagination(page, limit);
 
-    const { start: dateStarted } = generateDateRange(dateStart);
-    const { end: dateEnded } = generateDateRange(dateEnd);
+    let dateStarted: Date;
+    let dateEnded: Date;
+
+    if (dateStart && dateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Created',
+        dateStart,
+        dateEnd,
+      );
+
+      dateStarted = start;
+      dateEnded = end;
+    }
 
     const whereCondition: any = {
       category,
@@ -73,11 +84,7 @@ export class DocumentsService {
       this.prisma.document.findMany({
         where: whereCondition,
         include: {
-          uploader: {
-            select: {
-              username: true,
-            },
-          },
+          uploader: true,
         },
         orderBy: { [sort]: order },
         skip,
@@ -97,9 +104,14 @@ export class DocumentsService {
       }),
     ]);
 
+    const mappedDocuments = documents.map((doc) => ({
+      ...doc,
+      uploader: doc.uploader.username,
+    }));
+
     return {
       total,
-      data: documents,
+      data: mappedDocuments,
       newest: generateReadableDateTime(newest?.uploadedAt),
     };
   }
@@ -110,11 +122,7 @@ export class DocumentsService {
         slug: documentSlug,
       },
       include: {
-        uploader: {
-          select: {
-            username: true,
-          },
-        },
+        uploader: true,
       },
     });
 
@@ -122,7 +130,12 @@ export class DocumentsService {
       throw new NotFoundException('Document not found');
     }
 
-    return document;
+    const mappedDocument = {
+      ...document,
+      uploader: document.uploader.username,
+    };
+
+    return mappedDocument;
   }
 
   async createDocument(
@@ -165,8 +178,10 @@ export class DocumentsService {
     updatedData.uploaderId = uploaderId;
 
     try {
-      if (dto.name) {
-        updatedData.slug = this.generateDocumentSlug(dto.name);
+      if (dto.name && dto.name !== existingDocument.name) {
+        [updatedData.name, updatedData.slug] = await this.generateDocumentName(
+          dto.name,
+        );
       }
 
       const document = await this.prisma.document.update({
@@ -209,19 +224,9 @@ export class DocumentsService {
     ) {
       duplicateCount++;
       documentName = `${name}(${duplicateCount})`;
-      console.log({ duplicateCount });
       documentSlug = generateSlug(name) + `(${duplicateCount})`;
     }
 
     return [documentName, documentSlug];
-  }
-
-  private generateDocumentSlug(name: string): string {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s\(\)-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-')
-      .replace(/-+$/g, '');
   }
 }

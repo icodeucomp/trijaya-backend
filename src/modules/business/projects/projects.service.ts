@@ -9,10 +9,10 @@ import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
 import { GetData, MediaData } from '@common/interfaces';
 import {
-  generateDateRange,
   generatePagination,
   generateReadableDateTime,
   generateSlug,
+  validateAndGenerateDateRange,
 } from '@common/utils';
 import {
   CreateProjectDto,
@@ -25,14 +25,27 @@ export class ProjectsService {
   constructor(private prisma: PrismaService) {}
 
   async getAllProject(query: GetProjectDto): Promise<GetData<Project[]>> {
-    const { title, dateStart, dateEnd, sort, order, page, limit } = query;
+    const { title, business, dateStart, dateEnd, sort, order, page, limit } =
+      query;
     const { skip, take } = generatePagination(page, limit);
 
-    const { start: dateStarted } = generateDateRange(dateStart);
-    const { end: dateEnded } = generateDateRange(dateEnd);
+    let dateStarted: Date;
+    let dateEnded: Date;
+
+    if (dateStart && dateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Updated',
+        dateStart,
+        dateEnd,
+      );
+
+      dateStarted = start;
+      dateEnded = end;
+    }
 
     const whereCondition: any = {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(business && { businessId: Number(business) }),
       ...(dateStart &&
         dateEnd && {
           updatedAt: {

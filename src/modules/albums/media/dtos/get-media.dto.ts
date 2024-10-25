@@ -1,22 +1,12 @@
-import {
-  IsOptional,
-  IsEnum,
-  IsString,
-  IsNumberString,
-  IsNumber,
-} from 'class-validator';
+import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 
-import { ProductSortBy, OrderBy } from '@common/enums';
+import { MediaSortBy, OrderBy } from '@common/enums';
 import { defaultLimitPageData, defaultPage } from '@common/utils';
 
-export class GetServiceDto {
+export class GetMediaDto {
   @IsOptional()
   @IsString()
   title?: string;
-
-  @IsOptional()
-  @IsNumber()
-  businessId?: number;
 
   @IsOptional()
   @IsString()
@@ -27,8 +17,16 @@ export class GetServiceDto {
   dateEnd?: string;
 
   @IsOptional()
-  @IsEnum(ProductSortBy)
-  sort?: ProductSortBy = ProductSortBy.Id;
+  @IsString()
+  uploadedBy?: string;
+
+  @IsOptional()
+  @IsString()
+  album?: string;
+
+  @IsOptional()
+  @IsEnum(MediaSortBy)
+  sort?: MediaSortBy = MediaSortBy.Id;
 
   @IsOptional()
   @IsEnum(OrderBy)

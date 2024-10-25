@@ -1,7 +1,7 @@
 export enum AdminSortBy {
   Id = 'id',
-  Username = 'username',
-  Email = 'emmail',
+  FullName = 'fullName',
+  Email = 'email',
   CreatedAt = 'createdAt',
   UpdatedAt = 'updatedAt',
 }

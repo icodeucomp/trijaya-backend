@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Admin {
@@ -21,6 +21,7 @@ model Admin {
   blogs     Blog[]
   documents Document[]
   medias    Media[]
+  albums    Album[]
 
   @@map("admins")
 }
@@ -57,6 +58,24 @@ model Document {
   @@map("documents")
 }
 
+model Album {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name   String
+  slug   String  @unique
+  header String?
+  size   String?
+
+  creatorId Int
+  creator   Admin @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  medias Media[]
+
+  @@map("albums")
+}
+
 model Media {
   id         Int      @id @default(autoincrement())
   uploadedAt DateTime @default(now()) @updatedAt
@@ -65,6 +84,9 @@ model Media {
   slug String @unique
   url  String
   size String
+
+  albumId Int
+  album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   uploaderId Int
   uploader   Admin @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
@@ -84,7 +106,6 @@ model Business {
 
   Product Product[]
   Project Project[]
-  Service Service[]
 
   @@map("business")
 }
@@ -117,21 +138,6 @@ model Project {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("projects")
-}
-
-model Service {
-  id        Int      @id @default(autoincrement())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  title       String
-  slug        String @unique
-  description String
-  media       Json[]
-
-  businessId Int
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
-  @@map("services")
 }
 
 model ContactUs {

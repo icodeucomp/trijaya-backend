@@ -7,9 +7,9 @@ import { OrderBy } from '@common/enums';
 import { GetData } from '@common/interfaces';
 import {
   capitalizedWord,
-  generateDateRange,
   generatePagination,
   generateReadableDateTime,
+  validateAndGenerateDateRange,
 } from '@common/utils';
 import {
   CreateContactUsDto,
@@ -40,10 +40,32 @@ export class ContactUsService {
     } = query;
     const { skip, take } = generatePagination(page, limit);
 
-    const { start: dateCreatedStart } = generateDateRange(dateCreateStart);
-    const { end: dateCreatedEnd } = generateDateRange(dateCreateEnd);
-    const { start: dateUpdatedStart } = generateDateRange(dateUpdateStart);
-    const { end: dateUpdatedEnd } = generateDateRange(dateUpdateEnd);
+    let dateCreatedStart: Date;
+    let dateCreatedEnd: Date;
+    let dateUpdatedStart: Date;
+    let dateUpdatedEnd: Date;
+
+    if (dateCreateStart && dateCreateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Created',
+        dateCreateStart,
+        dateCreateEnd,
+      );
+
+      dateCreatedStart = start;
+      dateCreatedEnd = end;
+    }
+
+    if (dateUpdateStart && dateUpdateEnd) {
+      const { start, end } = validateAndGenerateDateRange(
+        'Updated',
+        dateUpdateStart,
+        dateUpdateEnd,
+      );
+
+      dateUpdatedStart = start;
+      dateUpdatedEnd = end;
+    }
 
     const whereCondition: any = {
       ...(fullName && {
@@ -55,14 +77,14 @@ export class ContactUsService {
       }),
       ...(dateCreateStart &&
         dateCreateEnd && {
-          uploadedAt: {
+          createdAt: {
             gte: dateCreatedStart,
             lt: dateCreatedEnd,
           },
         }),
       ...(dateUpdateStart &&
         dateUpdateEnd && {
-          uploadedAt: {
+          updatedAt: {
             gte: dateUpdatedStart,
             lt: dateUpdatedEnd,
           },
@@ -147,6 +169,9 @@ export class ContactUsService {
         dto.firstName && dto.lastName
           ? `${capitalizedWord(dto.firstName)} ${capitalizedWord(dto.lastName)}`
           : capitalizedWord(dto.firstName) || capitalizedWord(dto.lastName);
+
+      delete updatedData.firstName;
+      delete updatedData.lastName;
     }
 
     const contactUs = await this.prisma.contactUs.update({

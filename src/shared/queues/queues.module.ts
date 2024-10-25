@@ -1,6 +1,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { QueuesService } from './queues.service';
 
 @Global()
 @Module({
@@ -28,6 +29,7 @@ import { ConfigService } from '@nestjs/config';
       name: 'sendMail',
     }),
   ],
+  providers: [QueuesService],
   exports: [BullModule],
 })
 export class QueuesModule {}

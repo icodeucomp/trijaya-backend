@@ -17,16 +17,16 @@ import {
   CreateMediaDto,
   GetMediaDto,
   UpdateMediaDto,
-} from '@modules/media/dtos';
-import { MediaService } from '@modules/media/media.service';
+} from '@modules/albums/media/dtos';
+import { MediaService } from '@modules/albums/media/media.service';
 
 @UseGuards(JwtGuard)
-@Controller('media')
+@Controller()
 export class MediaController {
   constructor(private mediaService: MediaService) {}
 
   @Public()
-  @Get()
+  @Get('media')
   async getAllMedia(@Query() query: GetMediaDto) {
     const { total, data, newest } = await this.mediaService.getAllMedia(query);
 
@@ -34,39 +34,46 @@ export class MediaController {
   }
 
   @Public()
-  @Get(':mediaSlug')
+  @Get('media/:mediaSlug')
   async getMediaBySlug(@Param('mediaSlug') mediaSlug: string) {
     const media = await this.mediaService.getMediaBySlug(mediaSlug);
 
     return successResponsePayload(`Get media by slug ${mediaSlug}`, media);
   }
 
-  @Post()
+  @Post('albums/:albumSlug/media')
   async createMedia(
     @GetUser('id') uploaderId: number,
+    @Param('albumSlug') albumSlug: string,
     @Body() dtos: CreateMediaDto[],
   ) {
-    const media = await this.mediaService.createMedia(uploaderId, dtos);
+    const media = await this.mediaService.createMedia(
+      uploaderId,
+      albumSlug,
+      dtos,
+    );
 
     return successResponsePayload('Create media', media);
   }
 
-  @Patch(':mediaSlug')
+  @Patch('albums/:albumSlug/media/:mediaSlug')
   async updateMediaBySlug(
     @GetUser('id') uploaderId: number,
+    @Param('albumSlug') albumSlug: string,
     @Param('mediaSlug') mediaSlug: string,
     @Body() dto: UpdateMediaDto,
   ) {
     const media = await this.mediaService.updateMediaBySlug(
-      mediaSlug,
       uploaderId,
+      albumSlug,
+      mediaSlug,
       dto,
     );
 
     return successResponsePayload(`Update media by slug ${mediaSlug}`, media);
   }
 
-  @Delete(':mediaSlug')
+  @Delete('albums/:albumSlug/media/:mediaSlug')
   async deleteMediaBySlug(@Param('mediaSlug') mediaSlug: string) {
     const media = await this.mediaService.deleteMediaBySlug(mediaSlug);
 
