@@ -17,6 +17,7 @@ import { DocumentsModule } from '@modules/documents/documents.module';
 import { ContactUsModule } from '@modules/contact-us/contact-us.module';
 import { BusinessModule } from '@modules/business/business.module';
 import { MediaModule } from '@modules/albums/media/media.module';
+import { AppConfig } from './config/app.config';
 
 @Module({
   imports: [
@@ -40,6 +41,6 @@ import { MediaModule } from '@modules/albums/media/media.module';
     AlbumsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppConfig],
 })
 export class AppModule {}

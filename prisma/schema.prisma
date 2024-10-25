@@ -31,10 +31,10 @@ model Blog {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title       String
-  slug        String  @unique
-  content     String
-  imageHeader String?
+  title   String
+  slug    String  @unique
+  content String
+  header  String?
 
   authorId Int
   author   Admin @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -101,7 +101,7 @@ model Business {
   title         String
   slug          String @unique
   description   String
-  imageHeader   Json?
+  header        Json?
   productHeader Json?
 
   Product Product[]
@@ -132,6 +132,7 @@ model Project {
   title       String
   slug        String @unique
   description String
+  header      Json?
   media       Json[]
 
   businessId Int

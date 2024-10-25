@@ -15,7 +15,7 @@ async function main() {
       title: 'Civil',
       slug: BusinessSlug.Civil,
       description: "This is description for business 'civil'",
-      imageHeader: {
+      header: {
         slug: 'civil-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -28,7 +28,7 @@ async function main() {
       title: 'Construction',
       slug: BusinessSlug.Construction,
       description: "This is description for business 'construction'",
-      imageHeader: {
+      header: {
         slug: 'construction-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -41,7 +41,7 @@ async function main() {
       title: 'Electrical',
       slug: BusinessSlug.Electrical,
       description: "This is description for business 'electrical'",
-      imageHeader: {
+      header: {
         slug: 'electrical-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -54,7 +54,7 @@ async function main() {
       title: 'Fabrication',
       slug: BusinessSlug.Fabrication,
       description: "This is description for business 'fabrication'",
-      imageHeader: {
+      header: {
         slug: 'fabrication-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -67,7 +67,7 @@ async function main() {
       title: 'General Supplier',
       slug: BusinessSlug.General_supplier,
       description: "This is description for business 'general supplier'",
-      imageHeader: {
+      header: {
         slug: 'general-supplier-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -80,7 +80,7 @@ async function main() {
       title: 'Machining',
       slug: BusinessSlug.Machining,
       description: "This is description for business 'machining'",
-      imageHeader: {
+      header: {
         slug: 'machining-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -93,7 +93,7 @@ async function main() {
       title: 'Mechanical',
       slug: BusinessSlug.Mechanical,
       description: "This is description for business 'mechanical'",
-      imageHeader: {
+      header: {
         slug: 'mechanical-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
@@ -160,7 +160,7 @@ async function main() {
         title: `Blog ${i}`,
         slug: generateSlug(`Blog ${i}`),
         content: `Content for blog ${i}`,
-        imageHeader:
+        header:
           'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
         authorId: i,
       },
@@ -201,7 +201,7 @@ async function main() {
         title: businessData[i - 1].title,
         slug: businessData[i - 1].slug,
         description: businessData[i - 1].description,
-        imageHeader: businessData[i - 1].imageHeader,
+        header: businessData[i - 1].header,
         productHeader: businessData[i - 1].productHeader,
       },
     });
@@ -241,6 +241,10 @@ async function main() {
           title: `${businessData[i - 1].title} Project ${j}`,
           slug: `${businessData[i - 1].slug}-project-${j}`,
           description: `${businessData[i - 1].title} project ${j}`,
+          header: {
+            slug: `${businessData[i - 1].slug}-project-${j}-header`,
+            url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
+          },
           media: [
             {
               slug: `${businessData[i - 1].slug}-project-image${i}`,

@@ -1,7 +1,8 @@
 export enum MediaType {
-  Blog = 'blogs',
-  Business = 'business',
-  Document = 'documents',
   Album = 'album',
+  Blog = 'blog',
+  Business = 'business',
+  Document = 'document',
   Media = 'media',
+  Project = 'project',
 }

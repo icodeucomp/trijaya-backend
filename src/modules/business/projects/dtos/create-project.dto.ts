@@ -7,6 +7,16 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+export class ProjectHeaderDto {
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+}
+
 export class ProjectMediaDto {
   @IsString()
   @IsNotEmpty()
@@ -29,6 +39,11 @@ export class CreateProjectDto {
   @IsNumber()
   @IsNotEmpty()
   businessId: number;
+
+  @ValidateNested()
+  @Type(() => ProjectHeaderDto)
+  @IsOptional()
+  header?: ProjectHeaderDto;
 
   @ValidateNested()
   @Type(() => ProjectMediaDto)

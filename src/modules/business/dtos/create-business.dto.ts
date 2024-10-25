@@ -6,7 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class BusinessImageHeaderDto {
+export class BusinessHeaderDto {
   @IsString()
   @IsNotEmpty()
   slug: string;
@@ -16,7 +16,7 @@ export class BusinessImageHeaderDto {
   url: string;
 }
 
-export class ProductImageHeaderDto {
+export class ProductHeaderDto {
   @IsString()
   @IsNotEmpty()
   slug: string;
@@ -36,12 +36,12 @@ export class CreateBusinessDto {
   description: string;
 
   @ValidateNested()
-  @Type(() => BusinessImageHeaderDto)
+  @Type(() => BusinessHeaderDto)
   @IsOptional()
-  imageHeader?: BusinessImageHeaderDto;
+  header?: BusinessHeaderDto;
 
   @ValidateNested()
-  @Type(() => ProductImageHeaderDto)
+  @Type(() => ProductHeaderDto)
   @IsOptional()
-  productHeader?: ProductImageHeaderDto;
+  productHeader?: ProductHeaderDto;
 }

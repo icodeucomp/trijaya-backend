@@ -7,8 +7,9 @@ import { Prisma, Project } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
-import { GetData, MediaData } from '@common/interfaces';
+import { GetData, Header, MediaData } from '@common/interfaces';
 import {
+  generateDefaultHeader,
   generatePagination,
   generateReadableDateTime,
   generateSlug,
@@ -62,6 +63,7 @@ export class ProjectsService {
           business: {
             select: {
               title: true,
+              slug: true,
             },
           },
         },
@@ -99,6 +101,7 @@ export class ProjectsService {
         business: {
           select: {
             title: true,
+            slug: true,
           },
         },
       },
@@ -119,11 +122,16 @@ export class ProjectsService {
         dto.media = await this.validateProjectMedia(null, dto.media);
       }
 
+      const header = await this.validateProjectHeader(null, dto.header ?? null);
+
       const project = await this.prisma.project.create({
         data: {
           title: dto.title,
           slug,
           description: dto.description,
+          header:
+            (header as unknown as Prisma.InputJsonValue) ??
+            generateDefaultHeader(slug, null),
           media: dto.media as unknown as Prisma.InputJsonValue[],
           businessId: dto.businessId,
         },
@@ -150,6 +158,11 @@ export class ProjectsService {
         updatedData.slug = generateSlug(updatedData.title);
       }
 
+      const header = await this.validateProjectHeader(
+        existingProject.id,
+        dto.header ?? null,
+      );
+
       if (dto.media) {
         dto.media = await this.validateProjectMedia(
           existingProject.id,
@@ -163,6 +176,9 @@ export class ProjectsService {
         },
         data: {
           ...updatedData,
+          header: header
+            ? (header as unknown as Prisma.InputJsonValue)
+            : existingProject.header,
           media: updatedData.media as unknown as Prisma.InputJsonValue[],
         },
       });
@@ -188,6 +204,34 @@ export class ProjectsService {
     });
 
     return project;
+  }
+
+  private async validateProjectHeader(
+    projectId: number | null,
+    header: Header | null,
+  ): Promise<{ slug: string; url: string }> {
+    if (header) {
+      const duplicatedHeader = await this.prisma.project.findFirst({
+        where: {
+          header: {
+            path: ['slug'],
+            string_contains: header.slug.toLowerCase(),
+          },
+          NOT: {
+            ...(projectId ? { id: projectId } : {}),
+          },
+        },
+      });
+
+      if (duplicatedHeader) {
+        throw new BadRequestException('Duplicated business header');
+      }
+    }
+
+    return {
+      slug: header.slug.toLowerCase(),
+      url: header.url,
+    };
   }
 
   async validateProjectMedia(

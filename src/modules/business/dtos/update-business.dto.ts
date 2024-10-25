@@ -4,8 +4,8 @@ import { IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import {
   CreateBusinessDto,
-  BusinessImageHeaderDto,
-  ProductImageHeaderDto,
+  BusinessHeaderDto,
+  ProductHeaderDto,
 } from '@modules/business/dtos';
 
 export class UpdateBusinessDto extends PartialType(CreateBusinessDto) {
@@ -14,12 +14,12 @@ export class UpdateBusinessDto extends PartialType(CreateBusinessDto) {
   slug?: string;
 
   @ValidateNested()
-  @Type(() => BusinessImageHeaderDto)
+  @Type(() => BusinessHeaderDto)
   @IsOptional()
-  imageHeader?: BusinessImageHeaderDto;
+  imageHeader?: BusinessHeaderDto;
 
   @ValidateNested()
-  @Type(() => ProductImageHeaderDto)
+  @Type(() => ProductHeaderDto)
   @IsOptional()
-  productHeader?: ProductImageHeaderDto;
+  productHeader?: ProductHeaderDto;
 }

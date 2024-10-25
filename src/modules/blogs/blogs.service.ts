@@ -145,7 +145,7 @@ export class BlogsService {
 
   async createBlog(authorId: number, dto: CreateBlogDto): Promise<Blog> {
     const slug = generateSlug(dto.title);
-    const imageHeader = this.extractImageHeaderFromContent(dto.content);
+    const header = this.extractHeaderFromContent(dto.content);
 
     try {
       const blog = await this.prisma.blog.create({
@@ -153,7 +153,7 @@ export class BlogsService {
           title: dto.title,
           slug,
           content: dto.content,
-          imageHeader,
+          header,
           authorId: authorId,
         },
       });
@@ -179,9 +179,7 @@ export class BlogsService {
       }
 
       if (dto.content) {
-        updatedData.imageHeader = this.extractImageHeaderFromContent(
-          dto.content,
-        );
+        updatedData.header = this.extractHeaderFromContent(dto.content);
       }
 
       const blog = await this.prisma.blog.update({
@@ -214,7 +212,7 @@ export class BlogsService {
     return Blog;
   }
 
-  private extractImageHeaderFromContent(content: string | null): string | null {
+  private extractHeaderFromContent(content: string | null): string | null {
     const regex = /<img [^>]*src="([^"]+)"/;
     const firstImage = content.match(regex);
 

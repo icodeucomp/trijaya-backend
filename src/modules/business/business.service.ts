@@ -8,13 +8,9 @@ import { Business, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
+import { BusinessMetadata, GetData, Header } from '@common/interfaces';
 import {
-  BusinessImageHeader,
-  BusinessMetadata,
-  GetData,
-  ProductImageHeader,
-} from '@common/interfaces';
-import {
+  generateDefaultHeader,
   generatePagination,
   generateReadableDateTime,
   generateSlug,
@@ -160,9 +156,9 @@ export class BusinessService {
     const slug = generateSlug(dto.title);
 
     try {
-      const [imageHeader, productHeader] = await this.validateHeaderImages(
+      const [header, productHeader] = await this.validateBusinessHeaders(
         null,
-        dto.imageHeader ?? null,
+        dto.header ?? null,
         dto.productHeader ?? null,
       );
 
@@ -171,12 +167,12 @@ export class BusinessService {
           title: dto.title,
           slug,
           description: dto.description,
-          imageHeader:
-            (imageHeader as unknown as Prisma.InputJsonValue) ??
-            this.generateDefaultHeader(slug, 'image-header'),
+          header:
+            (header as unknown as Prisma.InputJsonValue) ??
+            generateDefaultHeader(slug, 'header'),
           productHeader:
             (productHeader as unknown as Prisma.InputJsonValue) ??
-            this.generateDefaultHeader(slug, 'product-header'),
+            generateDefaultHeader(slug, 'product-header'),
         },
       });
 
@@ -204,9 +200,9 @@ export class BusinessService {
         updatedData.slug = generateSlug(updatedData.title);
       }
 
-      const [imageHeader, productHeader] = await this.validateHeaderImages(
+      const [header, productHeader] = await this.validateBusinessHeaders(
         existingBusiness.id,
-        dto.imageHeader ?? null,
+        dto.header ?? null,
         dto.productHeader ?? null,
       );
 
@@ -216,9 +212,9 @@ export class BusinessService {
         },
         data: {
           ...updatedData,
-          imageHeader: imageHeader
-            ? (imageHeader as unknown as Prisma.InputJsonValue)
-            : existingBusiness.imageHeader,
+          header: header
+            ? (header as unknown as Prisma.InputJsonValue)
+            : existingBusiness.header,
           productHeader: productHeader
             ? (productHeader as unknown as Prisma.InputJsonValue)
             : existingBusiness.productHeader,
@@ -248,19 +244,19 @@ export class BusinessService {
     return business;
   }
 
-  private async validateHeaderImages(
+  private async validateBusinessHeaders(
     businessId: number | null,
-    businessHeader: BusinessImageHeader | null,
-    productHeader: ProductImageHeader | null,
+    header: Header | null,
+    productHeader: Header | null,
   ): Promise<{ slug: string; url: string }[]> {
     const headers: { slug: string; url: string }[] = [null, null];
 
-    if (businessHeader) {
+    if (header) {
       const duplicatedImageHeader = await this.prisma.business.findFirst({
         where: {
-          imageHeader: {
+          header: {
             path: ['slug'],
-            string_contains: businessHeader.slug.toLowerCase(),
+            string_contains: header.slug.toLowerCase(),
           },
           NOT: {
             ...(businessId ? { id: businessId } : {}),
@@ -269,12 +265,12 @@ export class BusinessService {
       });
 
       if (duplicatedImageHeader) {
-        throw new BadRequestException('Duplicated business image header');
+        throw new BadRequestException('Duplicated business header');
       }
 
       headers[0] = {
-        slug: businessHeader.slug.toLowerCase(),
-        url: businessHeader.url,
+        slug: header.slug.toLowerCase(),
+        url: header.url,
       };
     }
 
@@ -302,15 +298,5 @@ export class BusinessService {
     }
 
     return headers;
-  }
-
-  private generateDefaultHeader(
-    busingessSlug: string,
-    type: string,
-  ): { slug: string; url: string } {
-    return {
-      slug: `default-${type}-of-${busingessSlug}`,
-      url: this.config.get<string>('DEFAULT_IMAGE'),
-    };
   }
 }

@@ -11,5 +11,5 @@ export class CreateBlogDto {
 
   @IsString()
   @IsOptional()
-  imageHeader: string;
+  header: string;
 }

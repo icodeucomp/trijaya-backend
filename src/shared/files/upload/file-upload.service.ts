@@ -30,7 +30,10 @@ export class FileUploadService {
       throw new BadRequestException('please input file');
     }
 
-    if (type === MediaType.Business && !this.isValidBusinessSlug(category)) {
+    if (
+      (type === MediaType.Business || type === MediaType.Project) &&
+      !this.isValidBusinessSlug(category)
+    ) {
       throw new BadRequestException(
         `Upload failed, no business named ${category}`,
       );
@@ -52,7 +55,9 @@ export class FileUploadService {
           ? `${type}/${category}`
           : type === MediaType.Album
             ? `${type}/${category}/header`
-            : `${type}`;
+            : type === MediaType.Project
+              ? `business/${category}/${type}/header`
+              : `${type}`;
     const fileStream = fs.createReadStream(file.path);
     const contentType = file.mimetype || 'application/octet-stream';
     const fileSize = generateFileSize(file.size);
