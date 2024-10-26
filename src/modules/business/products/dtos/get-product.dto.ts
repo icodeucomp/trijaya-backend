@@ -9,7 +9,7 @@ export class GetProductDto {
   title?: string;
 
   @IsOptional()
-  @IsNumberString()
+  @IsString()
   business?: string;
 
   @IsOptional()

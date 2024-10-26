@@ -31,6 +31,7 @@ export class ProductsService {
 
     let dateStarted: Date;
     let dateEnded: Date;
+    let businessId: number;
 
     if (dateStart && dateEnd) {
       const { start, end } = validateAndGenerateDateRange(
@@ -43,9 +44,28 @@ export class ProductsService {
       dateEnded = end;
     }
 
+    if (business) {
+      const businessBySlug = await this.prisma.business.findUnique({
+        where: {
+          slug: business,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (businessBySlug) {
+        businessId = businessBySlug.id;
+      } else {
+        throw new NotFoundException(
+          `Product not found with business slug '${business}'`,
+        );
+      }
+    }
+
     const whereCondition: any = {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
-      ...(business && { businessId: Number(business) }),
+      ...(business && { businessId }),
       ...(dateStart &&
         dateEnd && {
           updatedAt: {

@@ -32,6 +32,7 @@ export class ProjectsService {
 
     let dateStarted: Date;
     let dateEnded: Date;
+    let businessId: number;
 
     if (dateStart && dateEnd) {
       const { start, end } = validateAndGenerateDateRange(
@@ -44,9 +45,28 @@ export class ProjectsService {
       dateEnded = end;
     }
 
+    if (business) {
+      const businessBySlug = await this.prisma.business.findUnique({
+        where: {
+          slug: business,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (businessBySlug) {
+        businessId = businessBySlug.id;
+      } else {
+        throw new NotFoundException(
+          `Project not found with business slug '${business}'`,
+        );
+      }
+    }
+
     const whereCondition: any = {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
-      ...(business && { businessId: Number(business) }),
+      ...(business && { businessId }),
       ...(dateStart &&
         dateEnd && {
           updatedAt: {

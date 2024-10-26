@@ -9,7 +9,7 @@ export class GetProjectDto {
   title?: string;
 
   @IsOptional()
-  @IsNumberString()
+  @IsString()
   business?: string;
 
   @IsOptional()
