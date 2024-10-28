@@ -12,28 +12,15 @@ async function main() {
 
   const businessData = [
     {
-      title: 'Civil',
-      slug: BusinessSlug.Civil,
-      description: "This is description for business 'civil'",
+      title: 'Civil & Construction',
+      slug: BusinessSlug.CivilConstruction,
+      description: "This is description for business 'civil & construction'",
       header: {
-        slug: 'civil-business-header',
+        slug: 'civil-construction-business-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
       productHeader: {
-        slug: 'civil-business-product-header',
-        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      },
-    },
-    {
-      title: 'Construction',
-      slug: BusinessSlug.Construction,
-      description: "This is description for business 'construction'",
-      header: {
-        slug: 'construction-business-header',
-        url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
-      },
-      productHeader: {
-        slug: 'construction-business-product-header',
+        slug: 'civil-construction-business-product-header',
         url: 'https://icodeu-storage.s3.ap-southeast-1.amazonaws.com/images/blogs/uiux1-1726546759614.png',
       },
     },

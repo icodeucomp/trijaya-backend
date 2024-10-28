@@ -1,7 +1,6 @@
 export enum BusinessSlug {
-  Civil = 'civil',
+  CivilConstruction = 'civil-construction',
   Fabrication = 'fabrication',
-  Construction = 'construction',
   Machining = 'machining',
   Mechanical = 'mechanical',
   Electrical = 'electrical',
