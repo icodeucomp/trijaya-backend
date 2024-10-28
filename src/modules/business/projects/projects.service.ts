@@ -174,14 +174,18 @@ export class ProjectsService {
     const updatedData: UpdateProjectDto = { ...dto };
 
     try {
+      let header: { slug: string; url: string } | null;
+
       if (dto.title) {
         updatedData.slug = generateSlug(updatedData.title);
       }
 
-      const header = await this.validateProjectHeader(
-        existingProject.id,
-        dto.header ?? null,
-      );
+      if (dto.header) {
+        header = await this.validateProjectHeader(
+          existingProject.id,
+          dto.header ?? null,
+        );
+      }
 
       if (dto.media) {
         dto.media = await this.validateProjectMedia(
