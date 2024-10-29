@@ -18,6 +18,7 @@ import { ContactUsModule } from '@modules/contact-us/contact-us.module';
 import { BusinessModule } from '@modules/business/business.module';
 import { MediaModule } from '@modules/albums/media/media.module';
 import { AppConfig } from './config/app.config';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AppConfig } from './config/app.config';
     MediaModule,
     ContactUsModule,
     AlbumsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfig],
