@@ -10,17 +10,38 @@ export class SearchService {
       where: {
         name: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        creator: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
 
     const blogs = await this.prisma.blog.findMany({
       where: {
         title: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        author: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
 
     const documents = await this.prisma.document.findMany({
       where: {
         name: { contains: name, mode: 'insensitive' },
+      },
+      include: {
+        uploader: {
+          select: {
+            username: true,
+          },
+        },
       },
     });
 
@@ -34,21 +55,60 @@ export class SearchService {
       where: {
         title: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        business: {
+          select: {
+            title: true,
+          },
+        },
+      },
     });
 
     const projects = await this.prisma.project.findMany({
       where: {
         title: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        business: {
+          select: {
+            title: true,
+          },
+        },
+      },
     });
 
+    const mappedAlbums = albums.map((album) => ({
+      ...album,
+      creator: album.creator.username,
+    }));
+
+    const mappedBlogs = blogs.map((blog) => ({
+      ...blog,
+      author: blog.author.username,
+    }));
+
+    const mappedDocuments = documents.map((document) => ({
+      ...document,
+      uploader: document.uploader.username,
+    }));
+
+    const mappedProducts = products.map((product) => ({
+      ...product,
+      business: product.business.title,
+    }));
+
+    const mappedProjects = projects.map((project) => ({
+      ...project,
+      business: project.business.title,
+    }));
+
     return [
-      ...albums,
-      ...blogs,
-      ...documents,
+      ...mappedAlbums,
+      ...mappedBlogs,
+      ...mappedDocuments,
       ...business,
-      ...products,
-      ...projects,
+      ...mappedProducts,
+      ...mappedProjects,
     ];
   }
 
@@ -57,17 +117,38 @@ export class SearchService {
       where: {
         name: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        creator: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
 
     const blogs = await this.prisma.blog.findMany({
       where: {
         title: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        author: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
 
     const documents = await this.prisma.document.findMany({
       where: {
         name: { contains: name, mode: 'insensitive' },
+      },
+      include: {
+        uploader: {
+          select: {
+            username: true,
+          },
+        },
       },
     });
 
@@ -81,21 +162,60 @@ export class SearchService {
       where: {
         title: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        business: {
+          select: {
+            title: true,
+          },
+        },
+      },
     });
 
     const projects = await this.prisma.project.findMany({
       where: {
         title: { contains: name, mode: 'insensitive' },
       },
+      include: {
+        business: {
+          select: {
+            title: true,
+          },
+        },
+      },
     });
 
+    const mappedAlbums = albums.map((album) => ({
+      ...album,
+      creator: album.creator.username,
+    }));
+
+    const mappedBlogs = blogs.map((blog) => ({
+      ...blog,
+      author: blog.author.username,
+    }));
+
+    const mappedDocuments = documents.map((document) => ({
+      ...document,
+      uploader: document.uploader.username,
+    }));
+
+    const mappedProducts = products.map((product) => ({
+      ...product,
+      business: product.business.title,
+    }));
+
+    const mappedProjects = projects.map((project) => ({
+      ...project,
+      business: project.business.title,
+    }));
+
     return {
-      albums,
-      blogs,
-      documents,
+      mappedAlbums,
+      mappedBlogs,
+      mappedDocuments,
       business,
-      products,
-      projects,
+      mappedProducts,
+      mappedProjects,
     };
   }
 }
