@@ -1,5 +1,6 @@
-import { DocumentCategory } from '@common/enums';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+
+import { DocumentCategory } from '@common/enums';
 
 export class CreateDocumentDto {
   @IsNotEmpty()

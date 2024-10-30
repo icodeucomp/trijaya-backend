@@ -1,6 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { SearchService } from './search.service';
+
 import { Public } from '@common/decorators';
+import { ResponsePayload } from '@common/interfaces';
+import { Features } from '@common/types';
+import { successResponsePayload } from '@common/utils';
+import { GetSearchDto } from '@modules/search/dtos';
+import { SearchService } from '@modules/search/search.service';
 
 @Controller('search')
 export class SearchController {
@@ -8,13 +13,12 @@ export class SearchController {
 
   @Public()
   @Get()
-  async getAllFeatureByNameNoGrouping(@Query('name') name: string) {
-    return await this.searchService.getAllFeatureByNameNoGrouping(name);
-  }
+  async getAllFeature(
+    @Query() query: GetSearchDto,
+  ): Promise<ResponsePayload<Features[]>> {
+    const { total, data, newest } =
+      await this.searchService.getAllFeature(query);
 
-  @Public()
-  @Get('grouped')
-  async getAllFeatureByName(@Query('name') name: string) {
-    return await this.searchService.getAllFeatureByName(name);
+    return successResponsePayload('Search features', data, total, newest);
   }
 }

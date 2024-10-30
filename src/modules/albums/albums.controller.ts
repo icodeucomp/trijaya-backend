@@ -12,14 +12,14 @@ import {
 
 import { GetUser, Public } from '@common/decorators';
 import { JwtGuard } from '@common/guards';
+import { AlbumMetadata, ResponsePayload } from '@common/interfaces';
 import { successResponsePayload } from '@common/utils';
-import { AlbumsService } from '@modules/albums/albums.service';
 import {
   CreateAlbumDto,
   GetAlbumDto,
   UpdateAlbumDto,
 } from '@modules/albums/dtos';
-import { AlbumMetadata, ResponsePayload } from '@common/interfaces';
+import { AlbumsService } from '@modules/albums/albums.service';
 
 @UseGuards(JwtGuard)
 @Controller('albums')

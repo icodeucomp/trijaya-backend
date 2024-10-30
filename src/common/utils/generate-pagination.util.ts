@@ -1,5 +1,6 @@
-import { Pagination } from '@common/interfaces/pagination.interface';
 import { BadRequestException } from '@nestjs/common';
+
+import { Pagination } from '@common/interfaces';
 
 export const generatePagination = (page: string, limit: string): Pagination => {
   if (Number(page) <= 0) {

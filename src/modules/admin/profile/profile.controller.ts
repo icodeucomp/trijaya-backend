@@ -1,4 +1,11 @@
-import { Body, Controller, Get, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseIntPipe,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { Admin } from '@prisma/client';
 
 import { GetUser } from '@common/decorators';
@@ -25,7 +32,7 @@ export class ProfileController {
     );
   }
 
-  @Get()
+  @Patch()
   async updateProfile(
     @GetUser('id', ParseIntPipe) adminId: number,
     @Body() dto: UpdateAdminDto,

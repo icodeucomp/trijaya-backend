@@ -1,5 +1,6 @@
-import { DateRange } from '@common/interfaces';
 import { BadRequestException } from '@nestjs/common';
+
+import { DateRange } from '@common/interfaces';
 
 export const generateDateRange = (dateString: string): DateRange | null => {
   const date = new Date(dateString);

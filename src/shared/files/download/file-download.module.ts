@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { FileDownloadService } from './file-download.service';
-import { FileDownloadController } from './file-download.controller';
+
+import { FileDownloadController } from '@shared/files/download/file-download.controller';
+import { FileDownloadService } from '@shared/files/download/file-download.service';
 
 @Module({
   providers: [FileDownloadService],
-  controllers: [FileDownloadController]
+  controllers: [FileDownloadController],
 })
 export class FileDownloadModule {}

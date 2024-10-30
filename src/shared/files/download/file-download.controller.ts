@@ -1,7 +1,8 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { FileDownloadService } from './file-download.service';
 import { Readable } from 'stream';
+
+import { FileDownloadService } from '@shared/files/download/file-download.service';
 
 @Controller('download')
 export class FileDownloadController {

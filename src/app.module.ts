@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppController } from '@src/app.controller';
+import { AppService } from '@src/app.service';
+import { AppConfig } from '@config/app.config';
 import { PrismaModule } from '@shared/prisma/prisma.module';
 import { S3Module } from '@shared/s3/s3.module';
 import { FileUploadModule } from '@shared/files/upload/file-upload.module';
@@ -17,8 +18,7 @@ import { DocumentsModule } from '@modules/documents/documents.module';
 import { ContactUsModule } from '@modules/contact-us/contact-us.module';
 import { BusinessModule } from '@modules/business/business.module';
 import { MediaModule } from '@modules/albums/media/media.module';
-import { AppConfig } from './config/app.config';
-import { SearchModule } from './modules/search/search.module';
+import { SearchModule } from '@modules/search/search.module';
 
 @Module({
   imports: [

@@ -1,5 +1,5 @@
 export function generateReadableDateTime(dateTime: Date | null): string | null {
-  if (dateTime === null) {
+  if (!dateTime) {
     return null;
   }
 

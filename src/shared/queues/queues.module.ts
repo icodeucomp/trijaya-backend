@@ -1,7 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { QueuesService } from './queues.service';
+
+import { QueuesService } from '@shared/queues/queues.service';
 
 @Global()
 @Module({
