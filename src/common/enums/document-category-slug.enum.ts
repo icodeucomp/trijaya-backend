@@ -1,5 +1,5 @@
 export enum DocumentCategory {
-  Award = 'award',
-  Certification = 'certification',
-  legality = 'legality',
+  Award = 'Award',
+  Certification = 'Certification',
+  legality = 'Legality',
 }
