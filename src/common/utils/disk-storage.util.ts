@@ -17,7 +17,7 @@ export const storage = diskStorage({
     const fileName = generateSlug(
       path.basename(file.originalname, fileExtension),
     );
-    callback(null, `${fileName}${fileExtension}`);
+    callback(null, fileName);
   },
 });
 
