@@ -22,8 +22,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prisma-dev": "rimraf ./prisma/migrations && npx prisma migrate dev -n \"init\"",
-    "postinstall": "prisma generate"
+    "prisma-dev": "rimraf ./prisma/migrations && npx prisma migrate dev -n \"init\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.650.0",
