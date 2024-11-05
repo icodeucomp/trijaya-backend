@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import {
   UploadApiErrorResponse,
   UploadApiResponse,
@@ -8,7 +14,25 @@ import * as fs from 'fs';
 import { ReadStream } from 'fs';
 
 @Injectable()
-export class CloudinaryService {
+export class CloudinaryService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(CloudinaryService.name);
+
+  async onModuleInit() {
+    try {
+      this.logger.log('Cloudinary client connected successfully.');
+    } catch (error) {
+      this.logger.error('Failed to connect to Cloudinary:', error);
+    }
+  }
+
+  async onModuleDestroy() {
+    try {
+      this.logger.log('Cloudinary client disconnected successfully.');
+    } catch (error) {
+      this.logger.error('Failed to disconnect from Cloudinary:', error);
+    }
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     folder: string,
@@ -26,7 +50,6 @@ export class CloudinaryService {
         },
       );
 
-      // Create a read stream from the file path
       const stream: ReadStream = fs.createReadStream(file.path);
       stream.pipe(upload);
 
@@ -35,7 +58,6 @@ export class CloudinaryService {
       });
 
       stream.on('end', () => {
-        // Optionally, remove the file after uploading
         fs.unlink(file.path, (err) => {
           if (err) console.error('Failed to delete temporary file:', err);
         });
