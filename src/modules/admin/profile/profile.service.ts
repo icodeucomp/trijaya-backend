@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Admin } from '@prisma/client';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { UpdateAdminDto } from '@modules/admin/dtos';
@@ -39,7 +39,7 @@ export class ProfileService {
     const updatedData: UpdateAdminDto = { ...dto };
 
     if (dto.password) {
-      updatedData.password = await argon.hash(dto.password);
+      updatedData.password = await bcrypt.hash(dto.password, 10);
     }
 
     const profile = await this.prisma.admin.update({

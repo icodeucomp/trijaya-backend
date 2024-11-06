@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Admin, Prisma } from '@prisma/client';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { OrderBy } from '@common/enums';
@@ -142,7 +142,7 @@ export class AdminService {
   }
 
   async createAdmin(dto: CreateAdminDto): Promise<Admin> {
-    const hashedPassword = await argon.hash(dto.password);
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     const admin = await this.prisma.admin.create({
       data: {
@@ -162,7 +162,7 @@ export class AdminService {
     const updatedData: UpdateAdminDto = { ...dto };
 
     if (dto.password) {
-      updatedData.password = await argon.hash(dto.password);
+      updatedData.password = await bcrypt.hash(dto.password, 10);
     }
 
     try {

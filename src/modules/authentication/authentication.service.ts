@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Admin } from '@prisma/client';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { JwtPayload, JwtTokens } from '@common/interfaces';
@@ -33,7 +33,7 @@ export class AuthenticationService {
         `Invalid username, no admin with username : ${dto.username}`,
       );
 
-    const passwordMatches = await argon.verify(admin.password, dto.password);
+    const passwordMatches = await bcrypt.compare(dto.password, admin.password);
 
     if (!passwordMatches) {
       throw new UnauthorizedException(`Password not match`);
@@ -78,7 +78,7 @@ export class AuthenticationService {
         `Invalid credential, no admin found with id : ${adminId}`,
       );
 
-    const refreshTokenMatches = await argon.verify(
+    const refreshTokenMatches = await bcrypt.compare(
       admin.refreshToken,
       refreshToken,
     );
@@ -128,7 +128,7 @@ export class AuthenticationService {
     adminId: number,
     refreshToken: string,
   ): Promise<void> {
-    const hashedRefreshToken = await argon.hash(refreshToken);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.prisma.admin.update({
       where: {
         id: adminId,

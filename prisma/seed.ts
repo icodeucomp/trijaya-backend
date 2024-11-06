@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcryptjs';
 import { generateSlug } from '../src/common/utils';
 import { BusinessSlug } from '../src/common/enums';
 
@@ -97,7 +97,7 @@ async function main() {
     create: {
       username: `master`,
       email: `master@mail.com`,
-      password: await argon.hash(`Master0123Pass`),
+      password: await bcrypt.hash('Master0123Pass', 10),
     },
   });
 
@@ -135,7 +135,7 @@ async function main() {
       create: {
         username: `admin${i}`,
         email: `admin${i}@mail.com`,
-        password: await argon.hash(`Admin${i}Pass`),
+        password: await bcrypt.hash(`Admin${i}Pass`, 10),
       },
     });
 
