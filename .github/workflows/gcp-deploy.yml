@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Correct permissions
+    environment: app-engine-config
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -27,7 +27,7 @@ jobs:
           else
             echo "✗ GCP_SA_KEY is not set"
           fi
-          
+
           if [ -n "${{ secrets.GCP_PROJECT_ID }}" ]; then
             echo "✓ GCP_PROJECT_ID is set"
           else
