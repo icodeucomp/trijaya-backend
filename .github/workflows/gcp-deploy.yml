@@ -30,6 +30,14 @@ jobs:
       - name: Build Node Project
         run: npm run build
 
+      - name: Debug secret
+        run: |
+          if [ -n "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "GCP_PROJECT_ID is set"
+          else
+            echo "GCP_PROJECT_ID is not set"
+          fi
+
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
