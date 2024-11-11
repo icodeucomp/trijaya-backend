@@ -8,6 +8,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Correct permissions
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
       - name: Checkout repository
@@ -15,24 +19,30 @@ jobs:
         with:
           ref: 'main'
 
-      - name: Test if GCP_PROJECT_ID secret is available
-        run: echo ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Debug secret
+      # Safer way to debug secrets (without exposing values)
+      - name: Debug Secrets
         run: |
-          if [ -n "${{ secrets.GCP_PROJECT_ID }}" ]; then
-            echo "GCP_PROJECT_ID is set"
+          if [ -n "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "✓ GCP_SA_KEY is set"
           else
-            echo "GCP_PROJECT_ID is not set"
+            echo "✗ GCP_SA_KEY is not set"
+          fi
+          
+          if [ -n "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "✓ GCP_PROJECT_ID is set"
+          else
+            echo "✗ GCP_PROJECT_ID is not set"
           fi
 
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Deploy to Google App Engine
         run: |
