@@ -1,12 +1,23 @@
 name: Deploy to Goggle App Engine
 
 on:
+  workflow_call:
+    secrets:
+      GCP_PROJECT_ID:
+        required: true
+      GCP_SA_KEY:
+        required: true
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   build-and-deploy:
@@ -22,7 +33,7 @@ jobs:
           ref: 'main'
 
       - name: Setup Node.js and npm
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
