@@ -1,12 +1,6 @@
 name: Deploy to Goggle App Engine
 
 on:
-  workflow_call:
-    secrets:
-      GCP_PROJECT_ID:
-        required: true
-      GCP_SA_KEY:
-        required: true
   push:
     branches:
       - main
@@ -24,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: 'main'
 
       - name: Setup Node.js and npm
         uses: actions/setup-node@v2
