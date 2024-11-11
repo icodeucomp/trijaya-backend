@@ -8,8 +8,8 @@ automatic_scaling:
   max_instances: 1
 
 # Environment variables
-includes:
-  - env.yaml
+# includes:
+#   - env.yaml
 
 # Basic handlers
 handlers:
