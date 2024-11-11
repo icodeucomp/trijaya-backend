@@ -37,10 +37,9 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Deploy to Google App Engine
+      - name: Create env.yaml
         run: |
-          gcloud app deploy app.yaml --quiet
-        env:
+          cat <<EOF > env.yaml
           DEFAULT_IMAGE: ${{ secrets.DEFAULT_IMAGE }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -61,3 +60,8 @@ jobs:
           CLOUDINARY_NAME: ${{ secrets.CLOUDINARY_NAME }}
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          EOF
+
+      - name: Deploy to Google App Engine
+        run: |
+          gcloud app deploy app.yaml --quiet
