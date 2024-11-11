@@ -40,27 +40,29 @@ jobs:
       - name: Create env.yaml
         run: |
           cat <<EOF > env.yaml
-          DEFAULT_IMAGE: ${{ secrets.DEFAULT_IMAGE }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
-          JWT_AT_SECRET: ${{ secrets.JWT_AT_SECRET }}
-          JWT_RT_SECRET: ${{ secrets.JWT_RT_SECRET }}
-          JWT_AT_EXPIRE: ${{ secrets.JWT_AT_EXPIRE }}
-          JWT_RT_EXPIRE: ${{ secrets.JWT_RT_EXPIRE }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          MAIL_HOST: ${{ secrets.MAIL_HOST }}
-          MAIL_PORT: ${{ secrets.MAIL_PORT }}
-          MAIL_SECURE: ${{ secrets.MAIL_SECURE }}
-          MAIL_USER: ${{ secrets.MAIL_USER }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          MAIL_NAME: ${{ secrets.MAIL_NAME }}
-          CLOUDINARY_NAME: ${{ secrets.CLOUDINARY_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          env_variables:
+            DEFAULT_IMAGE: "${{ secrets.DEFAULT_IMAGE }}"
+            DATABASE_URL: "${{ secrets.DATABASE_URL }}"
+            DIRECT_URL: "${{ secrets.DIRECT_URL }}"
+            JWT_AT_SECRET: "${{ secrets.JWT_AT_SECRET }}"
+            JWT_RT_SECRET: "${{ secrets.JWT_RT_SECRET }}"
+            JWT_AT_EXPIRE: "${{ secrets.JWT_AT_EXPIRE }}"
+            JWT_RT_EXPIRE: "${{ secrets.JWT_RT_EXPIRE }}"
+            REDIS_HOST: "${{ secrets.REDIS_HOST }}"
+            REDIS_PORT: "${{ secrets.REDIS_PORT }}"
+            REDIS_PASSWORD: "${{ secrets.REDIS_PASSWORD }}"
+            MAIL_HOST: "${{ secrets.MAIL_HOST }}"
+            MAIL_PORT: "${{ secrets.MAIL_PORT }}"
+            MAIL_SECURE: "${{ secrets.MAIL_SECURE }}"
+            MAIL_USER: "${{ secrets.MAIL_USER }}"
+            MAIL_PASSWORD: "${{ secrets.MAIL_PASSWORD }}"
+            MAIL_FROM: "${{ secrets.MAIL_FROM }}"
+            MAIL_NAME: "${{ secrets.MAIL_NAME }}"
+            CLOUDINARY_NAME: "${{ secrets.CLOUDINARY_NAME }}"
+            CLOUDINARY_API_KEY: "${{ secrets.CLOUDINARY_API_KEY }}"
+            CLOUDINARY_API_SECRET: "${{ secrets.CLOUDINARY_API_SECRET }}"
           EOF
+  
 
       - name: Deploy to Google App Engine
         run: |
