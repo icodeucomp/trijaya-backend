@@ -30,6 +30,9 @@ jobs:
       - name: Build Node Project
         run: npm run build
 
+      - name: Test if GCP_PROJECT_ID secret is available
+        run: echo ${{ secrets.GCP_PROJECT_ID }}
+
       - name: Debug secret
         run: |
           if [ -n "${{ secrets.GCP_PROJECT_ID }}" ]; then
