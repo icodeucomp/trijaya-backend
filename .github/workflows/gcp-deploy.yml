@@ -16,7 +16,7 @@ jobs:
           ref: 'main'
 
       - name: Test if GCP_PROJECT_ID secret is available
-        run: echo "GCP_PROJECT_ID is: ${{ secrets.GCP_PROJECT_ID }}"
+        run: echo ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Debug secret
         run: |
