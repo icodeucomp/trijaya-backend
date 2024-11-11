@@ -24,3 +24,4 @@ inbound_services:
   - warmup
 # By default app engine will run npm start if entrypoint not defined
 # entrypoint: npm start
+entrypoint: node entrypoint.js

@@ -21,10 +21,10 @@ jobs:
 
       - name: Debug Secrets
         run: |
-          if [ -n "${{ secrets.PORT }}" ]; then
-            echo "✓ PORT is set"
+          if [ -n "${{ secrets.DEFAULT_IMAGE }}" ]; then
+            echo "✓ DEFAULT_IMAGE is set"
           else
-            echo "✗ PORT is not set"
+            echo "✗ DEFAULT_IMAGE is not set"
           fi
 
       - name: Google Cloud Auth
@@ -62,7 +62,6 @@ jobs:
             CLOUDINARY_API_KEY: "${{ secrets.CLOUDINARY_API_KEY }}"
             CLOUDINARY_API_SECRET: "${{ secrets.CLOUDINARY_API_SECRET }}"
           EOF
-  
 
       - name: Deploy to Google App Engine
         run: |
