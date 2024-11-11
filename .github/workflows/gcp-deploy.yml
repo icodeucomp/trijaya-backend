@@ -19,19 +19,12 @@ jobs:
         with:
           ref: 'main'
 
-      # Safer way to debug secrets (without exposing values)
       - name: Debug Secrets
         run: |
-          if [ -n "${{ secrets.GCP_SA_KEY }}" ]; then
-            echo "✓ GCP_SA_KEY is set"
+          if [ -n "${{ secrets.PORT }}" ]; then
+            echo "✓ PORT is set"
           else
-            echo "✗ GCP_SA_KEY is not set"
-          fi
-
-          if [ -n "${{ secrets.GCP_PROJECT_ID }}" ]; then
-            echo "✓ GCP_PROJECT_ID is set"
-          else
-            echo "✗ GCP_PROJECT_ID is not set"
+            echo "✗ PORT is not set"
           fi
 
       - name: Google Cloud Auth
@@ -47,3 +40,25 @@ jobs:
       - name: Deploy to Google App Engine
         run: |
           gcloud app deploy app.yaml --quiet
+        env:
+          PORT: ${{ secrets.PORT }}
+          DEFAULT_IMAGE: ${{ secrets.DEFAULT_IMAGE }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          JWT_AT_SECRET: ${{ secrets.JWT_AT_SECRET }}
+          JWT_RT_SECRET: ${{ secrets.JWT_RT_SECRET }}
+          JWT_AT_EXPIRE: ${{ secrets.JWT_AT_EXPIRE }}
+          JWT_RT_EXPIRE: ${{ secrets.JWT_RT_EXPIRE }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_SECURE: ${{ secrets.MAIL_SECURE }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_NAME: ${{ secrets.MAIL_NAME }}
+          CLOUDINARY_NAME: ${{ secrets.CLOUDINARY_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
