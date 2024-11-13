@@ -32,4 +32,4 @@ RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # Start the server using the production build
-CMD [ "node", "dist/src/main.js" ]
+CMD [ "npm", "start" ]
