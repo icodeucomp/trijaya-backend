@@ -38,19 +38,6 @@ async function main() {
       },
     },
     {
-      title: 'Engineering',
-      slug: BusinessSlug.Engineering,
-      description: "This is description for business 'machining'",
-      header: {
-        slug: `${BusinessSlug.Engineering}-business-header`,
-        url: 'https://res.cloudinary.com/dkyazovdn/image/upload/v1731316558/trijaya-berkah-mandiri/default/default-image.png ',
-      },
-      productHeader: {
-        slug: `${BusinessSlug.Engineering}-business-product-header`,
-        url: 'https://res.cloudinary.com/dkyazovdn/image/upload/v1731316558/trijaya-berkah-mandiri/default/default-image.png ',
-      },
-    },
-    {
       title: 'Fabrication',
       slug: BusinessSlug.Fabrication,
       description: "This is description for business 'fabrication'",
