@@ -57,6 +57,7 @@ jobs:
           service: ${{ vars.SERVICE_NAME }}
           region: ${{ vars.REGION }}
           image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}
+          timeout: 900s
           env_vars: |
             DEFAULT_IMAGE=${{ secrets.DEFAULT_IMAGE }}
             FE_PRODUCTION=${{ secrets.FE_PRODUCTION }}
@@ -70,7 +71,6 @@ jobs:
             JWT_RT_EXPIRE=${{ secrets.JWT_RT_EXPIRE }}
             REDIS_HOST=${{ secrets.REDIS_HOST }}
             REDIS_PORT=${{ secrets.REDIS_PORT }}
-            REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}
             REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             MAIL_HOST=${{ secrets.MAIL_HOST }}
             MAIL_PORT=${{ secrets.MAIL_PORT }}
